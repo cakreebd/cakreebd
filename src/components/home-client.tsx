@@ -26,13 +26,25 @@ export type Job = {
   tags: string[];
 };
 
+type HomeStats = {
+  activeJobs: number;
+  hiringCompanies: number;
+  verifiedCompanies: number;
+};
+
+type HomepageCompany = {
+  id: string;
+  name: string;
+  verified: boolean;
+};
+
 const categories = [
-  { name: "Technology", count: "240+", icon: "tech" },
-  { name: "Marketing", count: "120+", icon: "megaphone" },
-  { name: "Sales", count: "185+", icon: "chart" },
-  { name: "Design", count: "96+", icon: "palette" },
-  { name: "Finance", count: "110+", icon: "wallet" },
-  { name: "Customer service", count: "84+", icon: "headset" },
+  { name: "Technology", icon: "tech" },
+  { name: "Marketing", icon: "megaphone" },
+  { name: "Sales", icon: "chart" },
+  { name: "Design", icon: "palette" },
+  { name: "Finance", icon: "wallet" },
+  { name: "Customer service", icon: "headset" },
 ];
 
 const locations = ["All locations", "Dhaka", "Chattogram", "Sylhet", "Remote"];
@@ -146,9 +158,15 @@ function Icon({
 export default function HomeClient({
   initialJobs,
   initiallySavedJobIds,
+  stats,
+  categoryCounts,
+  companies,
 }: {
   initialJobs: Job[];
   initiallySavedJobIds: number[];
+  stats: HomeStats;
+  categoryCounts: Record<string, number>;
+  companies: HomepageCompany[];
 }) {
   const router = useRouter();
   const [keyword, setKeyword] = useState("");
@@ -239,19 +257,11 @@ export default function HomeClient({
         <div className="hero-content">
           <div className="hero-copy">
             <div className="eyebrow"><span className="eyebrow-dot" /> YOUR NEXT CHAPTER STARTS HERE</div>
-            <h1 id="hero-title">Find work that<br />moves you <span>forward.</span></h1>
+            <h1 id="hero-title">Find Job that<br />moves you <span>forward.</span></h1>
             <p className="hero-description">
               Discover meaningful opportunities from teams across Bangladesh. Your next big thing is closer than you think.
             </p>
-            <div className="hero-proof">
-              <div aria-hidden="true" className="avatar-stack">
-                <span className="proof-avatar proof-avatar-one">R</span>
-                <span className="proof-avatar proof-avatar-two">S</span>
-                <span className="proof-avatar proof-avatar-three">N</span>
-                <span className="proof-avatar proof-avatar-four">+</span>
-              </div>
-              <span><strong>12,000+</strong> people found their fit this month</span>
-            </div>
+            <div className="hero-proof"><span><strong>{stats.activeJobs.toLocaleString("en-BD")}</strong> active opportunities across Bangladesh</span></div>
           </div>
 
           <form className="search-panel" onSubmit={handleSearch}>
@@ -306,15 +316,10 @@ export default function HomeClient({
         </div>
       </section>
 
-      <section aria-label="Trusted employers" className="trust-strip" id="companies">
-        <p>Good people, great places to work</p>
-        <div className="company-logos" aria-label="Pathao, bKash, Daraz, BRAC Bank, and ShopUp">
-          <span className="trusted-pathao">pathao</span>
-          <span className="trusted-bkash">bKash</span>
-          <span className="trusted-daraz">daraz</span>
-          <span className="trusted-brac">BRAC BANK</span>
-          <span className="trusted-shopup">shop<span>up</span></span>
-        </div>
+      <section aria-label="Cakree marketplace snapshot" className="trust-strip" id="companies">
+        <div className="marketplace-stat"><strong>{stats.activeJobs.toLocaleString("en-BD")}</strong><span>active opportunities</span></div>
+        <div className="marketplace-stat"><strong>{stats.hiringCompanies.toLocaleString("en-BD")}</strong><span>companies hiring</span></div>
+        <div className="marketplace-stat"><strong>{stats.verifiedCompanies.toLocaleString("en-BD")}</strong><span>verified companies</span></div>
       </section>
 
       <section aria-labelledby="category-title" className="section categories-section">
@@ -335,7 +340,7 @@ export default function HomeClient({
               type="button"
             >
               <span className={`category-icon category-icon-${index}`}><Icon className="h-[22px] w-[22px]" name={item.icon} /></span>
-              <span className="category-card-content"><strong>{item.name}</strong><small>{item.count} open roles</small></span>
+              <span className="category-card-content"><strong>{item.name}</strong><small>{(categoryCounts[item.name] ?? 0).toLocaleString("en-BD")} open roles</small></span>
               <Icon className="category-arrow h-[17px] w-[17px]" name="arrow" />
             </button>
           ))}
@@ -397,15 +402,42 @@ export default function HomeClient({
         )}
       </section>
 
-      <section aria-label="Career resources" className="career-banner" id="career-resources">
-        <div className="career-banner-icon"><Icon className="h-6 w-6" name="spark" /></div>
-        <div className="career-banner-copy">
-          <p className="section-kicker">A LITTLE HELP GOES A LONG WAY</p>
-          <h2>Make your next move a great one.</h2>
-          <p>Practical tips for your CV, interviews, and everything in between.</p>
+      {companies.length > 0 && <section aria-labelledby="companies-title" className="section discover-companies">
+        <div className="section-heading">
+          <div><p className="section-kicker">MEET THE TEAMS</p><h2 id="companies-title">Companies hiring now</h2></div>
+          <p className="section-description">Explore employer profiles and see the roles they’re hiring for.</p>
         </div>
-        <a className="button button-dark" href="#jobseekers">Explore career tips <Icon className="h-4 w-4" name="arrow" /></a>
-        <div aria-hidden="true" className="career-banner-decoration">✳</div>
+        <div className="company-discovery-grid">
+          {companies.map((company) => <Link className="company-discovery-card" href={`/companies/${company.id}`} key={company.id}>
+            <span className="company-discovery-mark">{company.name.slice(0, 1).toUpperCase()}</span>
+            <span><strong>{company.name}</strong><small>{company.verified ? "Verified employer" : "View company profile"}</small></span>
+            {company.verified && <VerifiedBadge />}
+            <Icon className="company-discovery-arrow h-4 w-4" name="arrow" />
+          </Link>)}
+        </div>
+      </section>}
+
+      <section aria-labelledby="journey-title" className="journey-section section" id="career-resources">
+        <div className="journey-intro">
+          <p className="section-kicker">YOUR NEXT MOVE, MADE SIMPLE</p>
+          <h2 id="journey-title">A clearer path to work that fits.</h2>
+          <p>From the first search to your next application, keep your job hunt focused and moving forward.</p>
+          <Link className="button button-primary" href="/jobs">Explore opportunities <Icon className="h-4 w-4" name="arrow" /></Link>
+        </div>
+        <ol className="journey-steps">
+          <li>
+            <span className="journey-step-number">01</span>
+            <div><h3>Find your fit</h3><p>Search openings by keyword, location, or category to find roles that match what you’re looking for.</p></div>
+          </li>
+          <li>
+            <span className="journey-step-number">02</span>
+            <div><h3>Get the full picture</h3><p>Review each job’s requirements, work mode, and salary details when the employer provides them.</p></div>
+          </li>
+          <li>
+            <span className="journey-step-number">03</span>
+            <div><h3>Apply and stay organized</h3><p>Create your account to apply and keep track of your applications from your dashboard.</p></div>
+          </li>
+        </ol>
       </section>
 
       <section aria-label="Get started" className="cta-section">
@@ -435,7 +467,7 @@ export default function HomeClient({
             <p>Good work changes everything.<br />Let&apos;s find yours.</p>
           </div>
           <div className="footer-links">
-            <div><strong>For job seekers</strong><a href="#jobs">Find a job</a><a href="#jobseekers">Create a profile</a><a href="#career-resources">Career tips</a></div>
+            <div><strong>For job seekers</strong><a href="#jobs">Find a job</a><a href="#jobseekers">Create a profile</a><a href="#career-resources">How it works</a></div>
             <div><strong>For employers</strong><a href="#employers">Post a job</a><a href="#companies">Browse companies</a></div>
             <div><strong>Say hello</strong><a href="mailto:hello@cakree.com">Contact us</a><a href="mailto:hello@cakree.com?subject=Support">Help &amp; support</a></div>
           </div>

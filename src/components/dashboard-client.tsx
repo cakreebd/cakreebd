@@ -166,6 +166,23 @@ function CandidateDashboard({
 }) {
   const [applications, setApplications] = useState(initialApplications);
   const [savedJobs, setSavedJobs] = useState(initialSavedJobs);
+  const [applicationFilter, setApplicationFilter] = useState("ALL");
+  const activeApplications = applications.filter((application) => !["REJECTED", "HIRED"].includes(application.status)).length;
+  const shortlistedApplications = applications.filter((application) => application.status === "SHORTLISTED").length;
+  const visibleApplications = applications.filter((application) => {
+    if (applicationFilter === "IN_PROGRESS") return !["REJECTED", "HIRED"].includes(application.status);
+    if (applicationFilter === "INTERVIEW") return application.interviews.some((interview) => interview.status === "SCHEDULED");
+    if (applicationFilter === "COMPLETED") return ["REJECTED", "HIRED"].includes(application.status);
+    return applicationFilter === "ALL" || application.status === applicationFilter;
+  });
+  const scheduledInterviews = applications.reduce(
+    (total, application) => total + application.interviews.filter((interview) => interview.status === "SCHEDULED").length,
+    0,
+  );
+  const upcomingInterviews = applications.flatMap((application) => application.interviews
+    .filter((interview) => interview.status === "SCHEDULED" && new Date(interview.scheduledAt).getTime() >= Date.now())
+    .map((interview) => ({ ...interview, companyName: application.job.companyName, jobId: application.job.id })))
+    .sort((first, second) => first.scheduledAt.localeCompare(second.scheduledAt));
   const [name, setName] = useState(profile.name);
   const [phone, setPhone] = useState(profile.phone ?? "");
   const [location, setLocation] = useState(profile.location ?? "");
@@ -179,6 +196,18 @@ function CandidateDashboard({
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const profileFields = [name.trim(), phone.trim(), location.trim(), headline.trim(), bio.trim(), skills.trim(), cvName];
+  const completedProfileFields = profileFields.filter(Boolean).length;
+  const profileCompletion = Math.round((completedProfileFields / profileFields.length) * 100);
+  const nextProfileStep = !headline.trim()
+    ? "Add a professional headline"
+    : !skills.trim()
+      ? "Add your key skills"
+      : !cvName
+        ? "Upload your CV"
+        : !bio.trim()
+          ? "Add a short introduction"
+          : "Keep your profile up to date";
 
   useEffect(() => {
     fetch("/api/job-alerts")
@@ -371,10 +400,53 @@ function CandidateDashboard({
         <h1>Welcome, {profile.name.split(" ")[0]}.</h1>
         <p>Keep your profile ready and stay close to the roles you care about.</p>
       </div>
+      <nav aria-label="Job seeker dashboard sections" className="dashboard-shortcuts">
+        <a href="#candidate-applications">Applications</a>
+        <a href="#candidate-profile">My profile</a>
+        <a href="#candidate-saved">Saved jobs</a>
+        <a href="#candidate-alerts">Job alerts</a>
+        <Link href="/resume">Resume builder</Link>
+        <Link href="/jobs">Find jobs <span aria-hidden="true">↗</span></Link>
+      </nav>
       {(error || message) && <p className={error ? "form-error" : "form-success"} role={error ? "alert" : "status"}>{error || message}</p>}
+      <section aria-label="Profile readiness" className="profile-readiness">
+        <div className="profile-readiness-copy">
+          <span className="readiness-mark" aria-hidden="true">✦</span>
+          <div>
+            <p className="section-kicker">YOUR PROFILE READINESS</p>
+            <h2>{profileCompletion === 100 ? "Your profile is looking great." : "Take one more step toward being discovered."}</h2>
+            <p>{profileCompletion === 100 ? "Your key profile details are filled in. Keep them current as your experience grows." : `Next up: ${nextProfileStep.toLowerCase()}. A complete profile gives employers a clearer view of what you bring.`}</p>
+          </div>
+        </div>
+        <div aria-label={`Profile ${profileCompletion}% complete`} className="readiness-progress">
+          <div aria-hidden="true" className="readiness-progress-track"><span style={{ width: `${profileCompletion}%` }} /></div>
+          <strong>{profileCompletion}%</strong>
+          <a href="#candidate-profile">{profileCompletion === 100 ? "Review profile" : "Complete profile"} <span aria-hidden="true">→</span></a>
+        </div>
+      </section>
+      <div aria-label="Application overview" className="application-overview">
+        <div><strong>{applications.length}</strong><span>Total applications</span></div>
+        <div><strong>{activeApplications}</strong><span>Still in progress</span></div>
+        <div><strong>{shortlistedApplications}</strong><span>Shortlisted</span></div>
+        <div><strong>{scheduledInterviews}</strong><span>Interviews scheduled</span></div>
+      </div>
+      {upcomingInterviews.length > 0 && <section aria-labelledby="upcoming-interviews-title" className="upcoming-interviews">
+        <div className="upcoming-interviews-heading">
+          <span className="upcoming-interviews-icon" aria-hidden="true">◷</span>
+          <div><p className="section-kicker">COMING UP</p><h2 id="upcoming-interviews-title">Your next interviews</h2></div>
+        </div>
+        <div className="upcoming-interview-list">{upcomingInterviews.map((interview) => (
+          <article className="upcoming-interview" key={interview.id}>
+            <div><strong>{interview.jobTitle}</strong><p>{interview.companyName} · {formatDateTime(interview.scheduledAt)}</p></div>
+            {interview.meetingUrl
+              ? <a className="button button-outline" href={interview.meetingUrl} rel="noreferrer" target="_blank">Join interview <span aria-hidden="true">↗</span></a>
+              : interview.location && <span className="upcoming-interview-location">{interview.location}</span>}
+          </article>
+        ))}</div>
+      </section>}
       <div className="dashboard-columns">
         <div className="dashboard-main-column">
-          <section className="dashboard-card">
+          <section className="dashboard-card" id="candidate-profile">
             <div className="dashboard-card-heading"><div><p className="section-kicker">YOUR STORY</p><h2>Candidate profile</h2></div><span className="profile-badge">{profile.email}</span></div>
             <form className="dashboard-form" onSubmit={saveProfile}>
               <label>Full name<input maxLength={80} minLength={2} onChange={(event) => setName(event.target.value)} required value={name} /></label>
@@ -390,9 +462,18 @@ function CandidateDashboard({
             </form>
           </section>
 
-          <section className="dashboard-card">
+          <section className="dashboard-card" id="candidate-applications">
             <div className="dashboard-card-heading"><div><p className="section-kicker">YOUR APPLICATIONS</p><h2>Application activity</h2></div><span className="count-badge">{applications.length}</span></div>
-            {applications.length ? <div className="dashboard-list">{applications.map((application) => (
+            {applications.length > 0 && <div aria-label="Filter applications" className="application-filters">
+              {[
+                { value: "ALL", label: "All", count: applications.length },
+                { value: "IN_PROGRESS", label: "In progress", count: activeApplications },
+                { value: "SHORTLISTED", label: "Shortlisted", count: shortlistedApplications },
+                { value: "INTERVIEW", label: "Interview", count: applications.filter((application) => application.interviews.some((interview) => interview.status === "SCHEDULED")).length },
+                { value: "COMPLETED", label: "Completed", count: applications.filter((application) => ["REJECTED", "HIRED"].includes(application.status)).length },
+              ].map((filter) => <button aria-pressed={applicationFilter === filter.value} className="application-filter" key={filter.value} onClick={() => setApplicationFilter(filter.value)} type="button">{filter.label}<span>{filter.count}</span></button>)}
+            </div>}
+            {applications.length ? visibleApplications.length ? <div className="dashboard-list">{visibleApplications.map((application) => (
               <article className="activity-row" key={application.id}>
                 <div><Link className="activity-title" href={`/jobs/${application.job.id}`}>{application.job.title}</Link><p>{application.job.companyName} · {application.job.location}</p>{application.interviews.filter((interview) => interview.status === "SCHEDULED").map((interview) => <p key={interview.id}>Interview: {formatDateTime(interview.scheduledAt)}{interview.location ? ` · ${interview.location}` : ""}{interview.meetingUrl ? <> · <a className="text-link" href={interview.meetingUrl} rel="noreferrer" target="_blank">Join meeting</a></> : ""}{interview.notes ? ` · ${interview.notes}` : ""}</p>)}
                   {application.status === "HIRED" && application.reviewEligible && !application.review && <form className="stacked-form no-print" onSubmit={(event) => submitReview(event, application.id)}>
@@ -407,10 +488,10 @@ function CandidateDashboard({
                 </div>
                 <div className="activity-status"><span className={`status-pill status-${application.status.toLowerCase()}`}>{statusLabel(application.status)}</span><small>{formatDate(application.createdAt)}</small></div>
               </article>
-            ))}</div> : <div className="dashboard-empty"><p>You haven’t applied for a role yet.</p><Link className="text-link" href="/jobs">Explore open jobs →</Link></div>}
+            ))}</div> : <div className="dashboard-empty"><p>No applications in this view yet.</p><button className="subtle-button" onClick={() => setApplicationFilter("ALL")} type="button">Show all applications</button></div> : <div className="dashboard-empty"><p>You haven’t applied for a role yet.</p><Link className="text-link" href="/jobs">Explore open jobs →</Link></div>}
           </section>
 
-          <section className="dashboard-card">
+          <section className="dashboard-card" id="candidate-saved">
             <div className="dashboard-card-heading"><div><p className="section-kicker">SAVED FOR LATER</p><h2>Saved jobs</h2></div><span className="count-badge">{savedJobs.length}</span></div>
             {savedJobs.length ? <div className="dashboard-list">{savedJobs.map((saved) => (
               <article className="activity-row" key={saved.id}>
@@ -420,7 +501,7 @@ function CandidateDashboard({
             ))}</div> : <div className="dashboard-empty"><p>Save interesting roles and they’ll be waiting here.</p><Link className="text-link" href="/jobs">Find a job →</Link></div>}
           </section>
 
-          <section className="dashboard-card">
+          <section className="dashboard-card" id="candidate-alerts">
             <div className="dashboard-card-heading"><div><p className="section-kicker">STAY IN THE LOOP</p><h2>Job alerts</h2></div><span className="count-badge">{alerts.length}</span></div>
             <form className="dashboard-form" onSubmit={createAlert}>
               <label>Alert name<input maxLength={80} minLength={2} name="name" placeholder="Remote product jobs" required /></label>
@@ -476,6 +557,8 @@ function EmployerDashboard({
   notifications: DashboardNotification[];
 }) {
   const [jobs, setJobs] = useState(initialJobs);
+  const [applicantSearch, setApplicantSearch] = useState("");
+  const [applicationStatusFilter, setApplicationStatusFilter] = useState("ALL");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
@@ -737,8 +820,18 @@ function EmployerDashboard({
     }
   }
 
-  const totalApplications = jobs.reduce((count, job) => count + job.applications.length, 0);
+  const allApplications = jobs.flatMap((job) => job.applications);
+  const totalApplications = allApplications.length;
   const activeJobCount = jobs.filter((job) => job.status === "ACTIVE").length;
+  const inReviewCount = allApplications.filter((application) => ["SUBMITTED", "REVIEWING"].includes(application.status)).length;
+  const shortlistedCount = allApplications.filter((application) => application.status === "SHORTLISTED").length;
+  const interviewCount = allApplications.filter((application) => application.interviews.some((interview) => interview.status === "SCHEDULED")).length;
+  const pipelineStages = [
+    { value: "SUBMITTED", label: "New", count: allApplications.filter((application) => application.status === "SUBMITTED").length },
+    { value: "REVIEWING", label: "In review", count: allApplications.filter((application) => application.status === "REVIEWING").length },
+    { value: "SHORTLISTED", label: "Shortlisted", count: shortlistedCount },
+    { value: "HIRED", label: "Hired", count: allApplications.filter((application) => application.status === "HIRED").length },
+  ];
 
   return (
     <main className="dashboard-shell">
@@ -747,11 +840,27 @@ function EmployerDashboard({
         <h1>{profile.companyName || "Your company"} dashboard</h1>
         <p>Post openings and keep your hiring moving.</p>
       </div>
+      <nav aria-label="Employer dashboard sections" className="dashboard-shortcuts">
+        <a href="#employer-post-job">Post a job</a>
+        <a href="#employer-applications">Applicants</a>
+        <a href="#employer-candidates">Find candidates</a>
+        <a href="#employer-company">Company profile</a>
+        <a href="#employer-plan">Hiring package</a>
+      </nav>
       {(error || message || paymentMessage) && <p className={error ? "form-error" : "form-success"} role={error ? "alert" : "status"}>{error || message || paymentMessage}</p>}
-      <div className="employer-stats"><div><strong>{activeJobCount}</strong><span>Active jobs</span></div><div><strong>{totalApplications}</strong><span>Applications</span></div><div><strong>{jobs.length}</strong><span>Total postings</span></div></div>
+      <div className="employer-stats"><div><strong>{activeJobCount}</strong><span>Active jobs</span></div><div><strong>{totalApplications}</strong><span>Applications</span></div><div><strong>{inReviewCount}</strong><span>To review</span></div><div><strong>{shortlistedCount}</strong><span>Shortlisted</span></div></div>
+      <section aria-label="Hiring pipeline" className="hiring-pipeline">
+        <div className="hiring-pipeline-heading"><div><p className="section-kicker">HIRING PIPELINE</p><h2>See where candidates are</h2></div><a href="#employer-applications">Manage applicants <span aria-hidden="true">→</span></a></div>
+        <div className="hiring-pipeline-stages">
+          {pipelineStages.map((stage) => <button aria-pressed={applicationStatusFilter === stage.value} className="hiring-pipeline-stage" key={stage.value} onClick={() => { setApplicationStatusFilter(stage.value); document.getElementById("employer-applications")?.scrollIntoView({ behavior: "smooth" }); }} type="button">
+            <span className="hiring-pipeline-stage-label">{stage.label}</span><strong>{stage.count}</strong><span className="hiring-pipeline-track"><span style={{ width: `${totalApplications ? Math.max(5, (stage.count / totalApplications) * 100) : 0}%` }} /></span>
+          </button>)}
+          <div className="hiring-pipeline-stage hiring-pipeline-interviews"><span className="hiring-pipeline-stage-label">Interviews scheduled</span><strong>{interviewCount}</strong><span className="hiring-pipeline-stage-note">Across all your openings</span></div>
+        </div>
+      </section>
       <div className="dashboard-columns employer-columns">
         <div className="dashboard-main-column">
-          <section className="dashboard-card">
+          <section className="dashboard-card" id="employer-post-job">
             <div className="dashboard-card-heading"><div><p className="section-kicker">CREATE AN OPPORTUNITY</p><h2>Post a job</h2></div></div>
             <form className="dashboard-form" onSubmit={createJob}>
               <label className="full-width">Job title<input maxLength={140} minLength={3} name="title" placeholder="e.g. Senior Product Designer" required /></label>
@@ -770,13 +879,27 @@ function EmployerDashboard({
             </form>
           </section>
 
-          <section className="dashboard-card">
+          <section className="dashboard-card" id="employer-applications">
             <div className="dashboard-card-heading"><div><p className="section-kicker">YOUR OPENINGS</p><h2>Job postings</h2></div><span className="count-badge">{jobs.length}</span></div>
-            {jobs.length ? <div className="dashboard-list">{jobs.map((job) => (
+            {jobs.length > 0 && <div className="applicant-filters">
+              <label>Find an applicant<input onChange={(event) => setApplicantSearch(event.target.value)} placeholder="Name, email, skills, or job title" value={applicantSearch} /></label>
+              <label>Application stage<select onChange={(event) => setApplicationStatusFilter(event.target.value)} value={applicationStatusFilter}>
+                <option value="ALL">All stages</option>
+                {["SUBMITTED", "REVIEWING", "SHORTLISTED", "REJECTED", "HIRED"].map((status) => <option key={status} value={status}>{statusLabel(status)}</option>)}
+              </select></label>
+            </div>}
+            {jobs.length ? <div className="dashboard-list">{jobs.map((job) => {
+              const normalizedSearch = applicantSearch.trim().toLowerCase();
+              const visibleApplications = job.applications.filter((application) => {
+                const matchesStatus = applicationStatusFilter === "ALL" || application.status === applicationStatusFilter;
+                const searchable = `${application.applicant.name} ${application.applicant.email} ${application.applicant.headline ?? ""} ${application.applicant.skills.join(" ")} ${job.title}`.toLowerCase();
+                return matchesStatus && (!normalizedSearch || searchable.includes(normalizedSearch));
+              });
+              return (
               <article className="employer-job-card" key={job.id}>
                 <div className="employer-job-heading"><div><h3><Link href={`/jobs/${job.id}`}>{job.title}</Link>{job.featured && <FeaturedBadge />}</h3><p>{job.location} · {job.employment}</p></div><span className={`status-pill status-${job.status.toLowerCase()}`}>{statusLabel(job.status)}</span></div>
-                <div className="applicant-list-heading"><strong>{job.applications.length} {job.applications.length === 1 ? "application" : "applications"}</strong><button className="subtle-button" onClick={() => updateJobStatus(job.id, job.status === "ACTIVE" ? "CLOSED" : "ACTIVE")} type="button">{job.status === "ACTIVE" ? "Close job" : "Reopen job"}</button></div>
-                {job.applications.length > 0 && <div className="applicant-list">{job.applications.map((application) => (
+                <div className="applicant-list-heading"><strong>{visibleApplications.length}{visibleApplications.length !== job.applications.length ? ` of ${job.applications.length}` : ""} {visibleApplications.length === 1 ? "application" : "applications"}</strong><button className="subtle-button" onClick={() => updateJobStatus(job.id, job.status === "ACTIVE" ? "CLOSED" : "ACTIVE")} type="button">{job.status === "ACTIVE" ? "Close job" : "Reopen job"}</button></div>
+                {visibleApplications.length > 0 ? <div className="applicant-list">{visibleApplications.map((application) => (
                   <div className="applicant-row" key={application.id}>
                     <div><strong>{application.applicant.name}</strong><p>{application.applicant.headline || application.applicant.location || application.applicant.email}</p>{application.applicant.skills.length > 0 && <small>{application.applicant.skills.join(" · ")}</small>}{application.coverLetter && <blockquote>{application.coverLetter}</blockquote>}{application.applicant.cvFileName && <a className="cv-download-link" href={`/api/applications/${application.id}/cv`}>Download CV · {application.applicant.cvFileName}</a>}
                       {application.interviews.filter((interview) => interview.status === "SCHEDULED").map((interview) => <p key={interview.id}>Interview: {formatDateTime(interview.scheduledAt)}{interview.location ? ` · ${interview.location}` : ""}{interview.meetingUrl ? <> · <a className="text-link" href={interview.meetingUrl} rel="noreferrer" target="_blank">Meeting link</a></> : ""}</p>)}
@@ -790,13 +913,16 @@ function EmployerDashboard({
                     </div>
                     <label className="status-select-label">Application status<select aria-label={`Status for ${application.applicant.name}`} onChange={(event) => updateApplication(application.id, event.target.value)} value={application.status}>{["SUBMITTED", "REVIEWING", "SHORTLISTED", "REJECTED", "HIRED"].map((status) => <option key={status} value={status}>{statusLabel(status)}</option>)}</select></label>
                   </div>
-                ))}</div>}
+                ))}</div> : job.applications.length > 0
+                  ? <p className="applicant-filter-empty">No applicants match these filters.</p>
+                  : <p className="applicant-filter-empty">No applications yet. Applicants will appear here when they apply.</p>}
               </article>
-            ))}</div> : <div className="dashboard-empty"><p>No openings yet. Add your first role above to meet candidates.</p></div>}
+              );
+            })}</div> : <div className="dashboard-empty"><p>No openings yet. Add your first role above to meet candidates.</p></div>}
           </section>
         </div>
         <aside className="dashboard-side-column">
-          <section className="dashboard-card">
+          <section className="dashboard-card" id="employer-candidates">
             <p className="section-kicker">RECRUITING TOOLS</p><h2>Search candidates</h2>
             <p>Only candidates who have opted into employer discovery are shown. CVs and contact details remain private until they apply.</p>
             <form className="stacked-form" onSubmit={searchCandidates}>
@@ -812,7 +938,7 @@ function EmployerDashboard({
             ))}</div>}
             {candidateResults.length === 0 && <p className="cv-empty">Search results appear here. Candidates control their visibility from their profile.</p>}
           </section>
-          <section className="dashboard-card">
+          <section className="dashboard-card" id="employer-plan">
             <p className="section-kicker">HIRING PACKAGES</p><h2>{EMPLOYER_PLANS[plan].name} package</h2>
             <p>{activeJobCount} of {EMPLOYER_PLANS[plan].activeJobLimit} active job slots used.{planExpiresAt ? ` Expires ${formatDate(planExpiresAt)}.` : ""}</p>
             {EMPLOYER_PLANS[plan].featuredListings && <p className="verification-state"><FeaturedBadge /> Active job listings are highlighted in search until your Growth package expires.</p>}
@@ -824,7 +950,7 @@ function EmployerDashboard({
             ))}</div>
             <p className="demo-notice">{paymentConfigured ? "Paid plans activate only after bKash confirms the exact amount, currency, and invoice. Set up bKash sandbox credentials before production." : "bKash checkout is disabled until server credentials, a token encryption key, and a public HTTPS SITE_URL are configured."}</p>
           </section>
-          <section className="dashboard-card">
+          <section className="dashboard-card" id="employer-company">
             <p className="section-kicker">YOUR COMPANY</p><h2>Company profile</h2>
             {verification?.status === "VERIFIED" && <p className="verification-state"><VerifiedBadge /> Your company registration has been reviewed.</p>}
             {profile.companyName && <p><Link className="text-link" href={`/companies/${profile.id}`}>View public profile →</Link></p>}

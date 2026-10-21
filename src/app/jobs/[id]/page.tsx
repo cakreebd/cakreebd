@@ -48,6 +48,48 @@ async function JobDetailContent({ params }: PageProps) {
   const applied = Array.isArray(job.applications) && job.applications.length > 0;
   const saved = Array.isArray(job.savedBy) && job.savedBy.length > 0;
   const hasCompanyProfile = job.companyName === job.employer.companyName;
+  const relatedWhere = {
+    id: { not: job.id },
+    status: "ACTIVE",
+    category: job.category,
+  };
+  let relatedJobs = await prisma.job.findMany({
+    where: relatedWhere,
+    orderBy: [
+      { featuredUntil: { sort: "desc", nulls: "last" } },
+      { createdAt: "desc" },
+    ],
+    take: 3,
+    select: {
+      id: true,
+      title: true,
+      companyName: true,
+      location: true,
+      employmentType: true,
+      salaryMin: true,
+      salaryMax: true,
+    },
+  });
+  if (relatedJobs.length === 0) {
+    relatedJobs = await prisma.job.findMany({
+      where: {
+        id: { not: job.id },
+        status: "ACTIVE",
+        location: { contains: job.location },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 3,
+      select: {
+        id: true,
+        title: true,
+        companyName: true,
+        location: true,
+        employmentType: true,
+        salaryMin: true,
+        salaryMax: true,
+      },
+    });
+  }
 
   return (
     <>
@@ -77,6 +119,15 @@ async function JobDetailContent({ params }: PageProps) {
             <SaveJobButton initiallySaved={saved} jobId={job.id} />
           </div>
           <div className="detail-action-card company-about"><h2>About {job.companyName}</h2>{hasCompanyProfile ? <><p>{job.employer.companyBio || "Learn more about this employer and explore their opportunities."}</p><Link className="text-link" href={`/companies/${job.employer.id}`}>View company profile →</Link>{job.employer.website && <a className="text-link" href={job.employer.website} rel="noreferrer" target="_blank">Visit company website ↗</a>}</> : <p>This sample listing does not have a public company profile yet.</p>}</div>
+          {relatedJobs.length > 0 && <section aria-labelledby="related-jobs-heading" className="detail-action-card related-jobs-card">
+            <h2 id="related-jobs-heading">More roles like this</h2>
+            {relatedJobs.map((relatedJob) => <article className="related-job" key={relatedJob.id}>
+              <Link href={`/jobs/${relatedJob.id}`}>{relatedJob.title}</Link>
+              <p>{relatedJob.companyName} · {relatedJob.location}</p>
+              <small>{formatSalary(relatedJob.salaryMin, relatedJob.salaryMax)} · {relatedJob.employmentType}</small>
+            </article>)}
+            <Link className="text-link" href={`/jobs?category=${encodeURIComponent(job.category)}`}>Explore {job.category} jobs →</Link>
+          </section>}
         </aside>
       </main>
     </>

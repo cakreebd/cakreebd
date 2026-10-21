@@ -35,6 +35,10 @@ async function JobsContent({ searchParams }: PageProps) {
   const category = get("category");
   const employmentType = get("employmentType");
   const workMode = get("workMode");
+  const requestedSort = get("sort");
+  const sort = ["salary-high", "salary-low"].includes(requestedSort)
+    ? requestedSort
+    : "newest";
   const minSalaryValue = Number(get("minSalary"));
   const minSalary = Number.isFinite(minSalaryValue) && minSalaryValue > 0
     ? Math.floor(minSalaryValue)
@@ -63,10 +67,22 @@ async function JobsContent({ searchParams }: PageProps) {
   const [jobs, total, saved] = await Promise.all([
     prisma.job.findMany({
       where,
-      orderBy: [
-        { featuredUntil: { sort: "desc", nulls: "last" } },
-        { createdAt: "desc" },
-      ],
+      orderBy: sort === "salary-high"
+        ? [
+            { featuredUntil: { sort: "desc", nulls: "last" } },
+            { salaryMax: { sort: "desc", nulls: "last" } },
+            { createdAt: "desc" },
+          ]
+        : sort === "salary-low"
+          ? [
+              { featuredUntil: { sort: "desc", nulls: "last" } },
+              { salaryMin: { sort: "asc", nulls: "last" } },
+              { createdAt: "desc" },
+            ]
+          : [
+              { featuredUntil: { sort: "desc", nulls: "last" } },
+              { createdAt: "desc" },
+            ],
       skip: (page - 1) * pageSize,
       take: pageSize,
       include: {
@@ -126,12 +142,19 @@ async function JobsContent({ searchParams }: PageProps) {
           <label>Minimum monthly salary (BDT)
             <input defaultValue={get("minSalary")} min="0" name="minSalary" placeholder="e.g. 50000" type="number" />
           </label>
+          <label>Sort results
+            <select defaultValue={sort} name="sort">
+              <option value="newest">Newest first</option>
+              <option value="salary-high">Highest salary</option>
+              <option value="salary-low">Lowest salary</option>
+            </select>
+          </label>
           <button className="button button-primary filter-submit" type="submit">Search jobs</button>
         </form>
 
         <div className="listing-heading">
           <div><h2>{total} {total === 1 ? "opportunity" : "opportunities"}</h2><p>Showing the latest matching roles</p></div>
-          {(q || location || category || employmentType || workMode || minSalary) && <Link className="text-link" href="/jobs">Clear filters</Link>}
+          {(q || location || category || employmentType || workMode || minSalary || sort !== "newest") && <Link className="text-link" href="/jobs">Clear filters</Link>}
         </div>
         <p className="demo-notice">Sample listings are included to preview Cakree. Employers can publish real openings from their dashboard.</p>
         {jobs.length ? (

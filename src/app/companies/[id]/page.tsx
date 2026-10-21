@@ -72,13 +72,22 @@ async function CompanyContent({ params }: PageProps) {
       <SiteHeader user={user} />
       <main className="page-shell">
         <Link className="back-link" href="/jobs">← Back to job search</Link>
-        <header className="page-heading">
-          <p className="section-kicker">COMPANY PROFILE</p>
-          <h1>{company.companyName}{company.companyVerification?.status === "VERIFIED" && <VerifiedBadge />}</h1>
-          {company.companyBio && <p>{company.companyBio}</p>}
-          {company.website && <p><a className="text-link" href={company.website} rel="noreferrer" target="_blank">Visit company website ↗</a></p>}
+        <header className="company-profile-hero">
+          <div className="company-profile-identity">
+            <span aria-hidden="true" className="company-profile-mark">{company.companyName.slice(0, 1).toUpperCase()}</span>
+            <div>
+              <p className="section-kicker">COMPANY PROFILE</p>
+              <h1>{company.companyName}{company.companyVerification?.status === "VERIFIED" && <VerifiedBadge />}</h1>
+              <p className="company-profile-summary">{company.companyBio || "Discover this employer’s open roles and learn more about their team."}</p>
+              {company.website && <a className="text-link" href={company.website} rel="noreferrer" target="_blank">Visit company website ↗</a>}
+            </div>
+          </div>
+          <div className="company-profile-stats">
+            <div><strong>{jobs.length}</strong><span>Open roles</span></div>
+            <div><strong>{rating === null ? "—" : rating.toFixed(1)}</strong><span>{reviews.length ? `${reviews.length} reviews` : "Company rating"}</span></div>
+          </div>
         </header>
-        <section className="dashboard-card">
+        <section className="dashboard-card company-openings">
           <div className="dashboard-card-heading"><div><p className="section-kicker">CURRENT OPENINGS</p><h2>Jobs at {company.companyName}</h2></div><span className="count-badge">{jobs.length}</span></div>
           {jobs.length ? <div className="dashboard-list">{jobs.map((job) => (
             <article className="activity-row" key={job.id}>

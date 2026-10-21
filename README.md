@@ -60,6 +60,7 @@ Use a separate job-seeker account to try candidate profiles, saved jobs, CV uplo
 - `npm run db:deploy` — apply committed migrations to a production database
 - `npm run db:seed` — add sample jobs and the local demo employer
 - `npm run db:create-admin` — create or reset a protected administrator account using environment variables
+- `npm run db:promote-admin -- cakreebd@gmail.com` — grant admin access to that existing account without changing its password
 
 The application now uses PostgreSQL. Existing local SQLite data is not migrated automatically; the SQLite database file is left untouched, but it cannot be used by this PostgreSQL configuration. CV files use the local filesystem in development unless `BLOB_READ_WRITE_TOKEN` or `BLOB_STORE_ID` is configured. Production uses private Vercel Blob storage and requires a private Blob store connected to the Vercel project. Local database files and uploaded files are excluded from source control.
 
@@ -85,7 +86,7 @@ Use credentials issued to your merchant account. Configure `BKASH_API_BASE_URL` 
 
 ### Administrator setup
 
-Set `CAKREE_ADMIN_EMAIL`, `CAKREE_ADMIN_NAME`, and `CAKREE_ADMIN_PASSWORD` (at least 16 characters) in the server environment, then run `npm run db:create-admin` once. This creates or resets only an existing administrator; it refuses to promote an ordinary account. Admin registration is not available through the public signup form.
+Set `CAKREE_ADMIN_EMAIL`, `CAKREE_ADMIN_NAME`, and `CAKREE_ADMIN_PASSWORD` (at least 16 characters) in the server environment, then run `npm run db:create-admin` once to create or reset an administrator account. To promote an existing account while preserving its password, confirm `.env` points to the intended production database, set `CONFIRM_PRODUCTION_ADMIN_PROMOTION=YES`, then run `npm run db:promote-admin -- email@example.com`. This command changes only that existing account's role, and refuses missing or inactive accounts. Admin registration is not available through the public signup form.
 
 Company reviews may only be submitted by candidates whose application was marked hired, and remain private until approved by an administrator. Email delivery and bKash integration require production credentials and are not verified by local builds.
 

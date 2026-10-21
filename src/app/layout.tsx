@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Cakree | Find work that moves you forward",
+  title: "Cakree | Find Job that moves you forward",
   description:
     "Discover meaningful job opportunities from Bangladesh's most-loved companies. Find your next move with Cakree.",
 };
