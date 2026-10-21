@@ -3,8 +3,10 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import SiteHeader from "@/components/site-header";
 import VerifiedBadge from "@/components/verified-badge";
+import FeaturedBadge from "@/components/featured-badge";
 import { getCurrentUser } from "@/lib/auth";
 import { formatSalary, parseTags } from "@/lib/jobs";
+import { expireFeaturedJobs } from "@/lib/featured-jobs";
 import { prisma } from "@/lib/prisma";
 
 type PageProps = { params: Promise<{ id: string }> };
@@ -16,6 +18,7 @@ export default function CompanyPage({ params }: PageProps) {
 async function CompanyContent({ params }: PageProps) {
   const { id } = await params;
   const user = await getCurrentUser();
+  await expireFeaturedJobs();
   const company = await prisma.user.findFirst({
     where: { id, role: "EMPLOYER", companyName: { not: null } },
     select: {
@@ -30,7 +33,10 @@ async function CompanyContent({ params }: PageProps) {
   const [jobs, reviews] = await Promise.all([
     prisma.job.findMany({
       where: { employerId: company.id, companyName: company.companyName, status: "ACTIVE" },
-      orderBy: { createdAt: "desc" },
+      orderBy: [
+        { featuredUntil: { sort: "desc", nulls: "last" } },
+        { createdAt: "desc" },
+      ],
       select: {
         id: true,
         title: true,
@@ -40,6 +46,7 @@ async function CompanyContent({ params }: PageProps) {
         salaryMin: true,
         salaryMax: true,
         tags: true,
+        featuredUntil: true,
       },
     }),
     prisma.companyReview.findMany({
@@ -77,6 +84,7 @@ async function CompanyContent({ params }: PageProps) {
             <article className="activity-row" key={job.id}>
               <div>
                 <Link className="activity-title" href={`/jobs/${job.id}`}>{job.title}</Link>
+                {job.featuredUntil && job.featuredUntil > new Date() && <FeaturedBadge />}
                 <p>{job.location} · {job.employmentType} · {job.workMode}</p>
                 <small>{formatSalary(job.salaryMin, job.salaryMax)} per month · {parseTags(job.tags).join(" · ")}</small>
               </div>

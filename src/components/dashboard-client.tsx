@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { EMPLOYER_PLANS, type EmployerPlanKey } from "@/lib/employer-plans";
 import VerifiedBadge from "@/components/verified-badge";
+import FeaturedBadge from "@/components/featured-badge";
 
 type BasicJob = {
   id: number;
@@ -13,6 +14,7 @@ type BasicJob = {
   location: string;
   employmentType: string;
   status: string;
+  featured?: boolean;
 };
 
 type CandidateProfile = {
@@ -100,6 +102,7 @@ type EmployerJob = {
   benefits: string | null;
   tags: string[];
   status: string;
+  featured?: boolean;
   applications: {
     id: string;
     status: string;
@@ -771,7 +774,7 @@ function EmployerDashboard({
             <div className="dashboard-card-heading"><div><p className="section-kicker">YOUR OPENINGS</p><h2>Job postings</h2></div><span className="count-badge">{jobs.length}</span></div>
             {jobs.length ? <div className="dashboard-list">{jobs.map((job) => (
               <article className="employer-job-card" key={job.id}>
-                <div className="employer-job-heading"><div><h3><Link href={`/jobs/${job.id}`}>{job.title}</Link></h3><p>{job.location} · {job.employment}</p></div><span className={`status-pill status-${job.status.toLowerCase()}`}>{statusLabel(job.status)}</span></div>
+                <div className="employer-job-heading"><div><h3><Link href={`/jobs/${job.id}`}>{job.title}</Link>{job.featured && <FeaturedBadge />}</h3><p>{job.location} · {job.employment}</p></div><span className={`status-pill status-${job.status.toLowerCase()}`}>{statusLabel(job.status)}</span></div>
                 <div className="applicant-list-heading"><strong>{job.applications.length} {job.applications.length === 1 ? "application" : "applications"}</strong><button className="subtle-button" onClick={() => updateJobStatus(job.id, job.status === "ACTIVE" ? "CLOSED" : "ACTIVE")} type="button">{job.status === "ACTIVE" ? "Close job" : "Reopen job"}</button></div>
                 {job.applications.length > 0 && <div className="applicant-list">{job.applications.map((application) => (
                   <div className="applicant-row" key={application.id}>
@@ -812,9 +815,10 @@ function EmployerDashboard({
           <section className="dashboard-card">
             <p className="section-kicker">HIRING PACKAGES</p><h2>{EMPLOYER_PLANS[plan].name} package</h2>
             <p>{activeJobCount} of {EMPLOYER_PLANS[plan].activeJobLimit} active job slots used.{planExpiresAt ? ` Expires ${formatDate(planExpiresAt)}.` : ""}</p>
+            {EMPLOYER_PLANS[plan].featuredListings && <p className="verification-state"><FeaturedBadge /> Active job listings are highlighted in search until your Growth package expires.</p>}
             <div className="dashboard-list">{(Object.keys(EMPLOYER_PLANS) as EmployerPlanKey[]).map((key) => (
               <article className="activity-row" key={key}>
-                <div><strong>{EMPLOYER_PLANS[key].name}</strong><p>{EMPLOYER_PLANS[key].price === 0 ? "Free" : `৳${EMPLOYER_PLANS[key].price.toLocaleString("en-BD")} / month`} · {EMPLOYER_PLANS[key].activeJobLimit} active jobs</p></div>
+                <div><strong>{EMPLOYER_PLANS[key].name}</strong><p>{EMPLOYER_PLANS[key].price === 0 ? "Free" : `৳${EMPLOYER_PLANS[key].price.toLocaleString("en-BD")} / month`} · {EMPLOYER_PLANS[key].activeJobLimit} active jobs{EMPLOYER_PLANS[key].featuredListings ? " · featured listing placement" : ""}</p></div>
                 <button className="subtle-button" disabled={plan === key || (key !== "FREE" && !paymentConfigured)} onClick={() => changePlan(key)} type="button">{plan === key ? "Current" : key === "FREE" ? "Downgrade" : paymentConfigured ? "Pay with bKash" : "Configure bKash"}</button>
               </article>
             ))}</div>

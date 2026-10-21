@@ -44,9 +44,26 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   const parsed = updateSchema.safeParse(body.data);
   if (!parsed.success) return badRequest("Choose a valid job status.");
 
+  let featuredUntil: Date | null = null;
+  if (parsed.data.status === "ACTIVE") {
+    const plan = await prisma.employerPlan.findUnique({
+      where: { userId: user.id },
+      select: { plan: true, expiresAt: true },
+    });
+    if (
+      plan?.plan === "GROWTH" &&
+      plan.expiresAt &&
+      plan.expiresAt > new Date()
+    ) {
+      featuredUntil = plan.expiresAt;
+    }
+  }
   const result = await prisma.job.updateMany({
     where: { id, employerId: user.id },
-    data: { status: parsed.data.status },
+    data: {
+      status: parsed.data.status,
+      featuredUntil: parsed.data.status === "ACTIVE" ? featuredUntil : null,
+    },
   });
   if (result.count === 0) return notFound("Job not found in your employer account.");
   const job = await prisma.job.findUniqueOrThrow({ where: { id } });

@@ -76,6 +76,7 @@ model Job {
   benefits       String?
   tags           String   @default("[]")
   status         String   @default("ACTIVE")
+  featuredUntil  DateTime?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   employer       User     @relation(fields: [employerId], references: [id], onDelete: Cascade)
@@ -83,6 +84,7 @@ model Job {
   savedBy        SavedJob[]
 
   @@index([status, createdAt])
+  @@index([status, featuredUntil, createdAt])
   @@index([category, location, employmentType, workMode])
   @@index([employerId])
 }

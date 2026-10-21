@@ -5,6 +5,7 @@ import ApplyButton from "@/components/apply-button";
 import SaveJobButton from "@/components/save-job-button";
 import SiteHeader from "@/components/site-header";
 import VerifiedBadge from "@/components/verified-badge";
+import FeaturedBadge from "@/components/featured-badge";
 import { getCurrentUser } from "@/lib/auth";
 import { formatSalary, parseTags, postedLabel } from "@/lib/jobs";
 import { prisma } from "@/lib/prisma";
@@ -59,7 +60,7 @@ async function JobDetailContent({ params }: PageProps) {
               <span className="result-logo detail-logo">{job.companyName.slice(0, 1).toUpperCase()}</span>
               <div>{hasCompanyProfile ? <Link className="result-company" href={`/companies/${job.employer.id}`}>{job.companyName}</Link> : <div className="result-company">{job.companyName}</div>}{hasCompanyProfile && job.employer.companyVerification?.status === "VERIFIED" && <VerifiedBadge />}<p>{job.location} · Posted {postedLabel(job.createdAt)}</p></div>
             </div>
-            <h1>{job.title}</h1>
+            <h1>{job.title}{job.featuredUntil && job.featuredUntil > new Date() && <FeaturedBadge />}</h1>
             <div className="result-meta"><span>{job.employmentType}</span><span>{job.workMode}</span><span>{job.category}</span><span>{job.location}</span></div>
             <p className="detail-salary">{formatSalary(job.salaryMin, job.salaryMax)} <small>per month</small></p>
             <section className="detail-section"><h2>About the role</h2><p>{job.description}</p></section>

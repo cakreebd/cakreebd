@@ -5,6 +5,7 @@ import type { FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import VerifiedBadge from "@/components/verified-badge";
+import FeaturedBadge from "@/components/featured-badge";
 
 export type Job = {
   id: number;
@@ -355,7 +356,7 @@ export default function HomeClient({
         {filteredJobs.length > 0 ? (
           <div className="job-grid">
             {filteredJobs.map((job) => (
-              <article className="job-card" key={job.id}>
+              <article className={`job-card${job.featured ? " job-card-featured" : ""}`} key={job.id}>
                 <div className="job-card-top">
                   <span className={`company-logo company-logo-${job.logoTone}`}>{job.logo}</span>
                   <button
@@ -368,7 +369,7 @@ export default function HomeClient({
                     <Icon name="bookmark" />
                   </button>
                 </div>
-                <div className="job-company">{job.company}{job.companyVerified && <VerifiedBadge />}<span className="job-posted">{job.posted}</span></div>
+                <div className="job-company">{job.company}{job.featured && <FeaturedBadge />}{job.companyVerified && <VerifiedBadge />}<span className="job-posted">{job.posted}</span></div>
                 <h3>{job.title}</h3>
                 <div className="job-meta">
                   <span><Icon name="pin" />{job.location}</span>

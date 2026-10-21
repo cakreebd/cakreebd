@@ -1,4 +1,5 @@
 import type { Job } from "@prisma/client";
+import { isJobFeatured } from "@/lib/featured-jobs";
 
 export function parseTags(tags: string): string[] {
   try {
@@ -34,6 +35,7 @@ export function postedLabel(date: Date) {
 export function toPublicJob(job: Job) {
   return {
     id: job.id,
+    featured: isJobFeatured(job.featuredUntil),
     title: job.title,
     company: job.companyName,
     location: job.location,

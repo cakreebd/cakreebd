@@ -40,7 +40,7 @@ Use a separate job-seeker account to try candidate profiles, saved jobs, CV uplo
 - Candidate directory search for job seekers who explicitly opt in; email and CV remain private
 - Interview scheduling with in-app candidate and employer notifications
 - Saved job alerts with matching jobs shown in the candidate dashboard
-- Employer job-posting packages with active-job limits
+- Employer job-posting packages with active-job limits and featured listing placement on Growth
 - Candidate resume builder with printable / Save as PDF output
 - Verified company reviews, published after admin moderation
 - Employer company-registration submissions with admin-reviewed verification badges

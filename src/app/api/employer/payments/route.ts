@@ -168,6 +168,10 @@ export async function GET(request: Request) {
         create: { userId: order.userId, plan: order.plan, expiresAt: planExpiry },
         update: { plan: order.plan, expiresAt: planExpiry },
       });
+      await transaction.job.updateMany({
+        where: { employerId: order.userId, status: "ACTIVE" },
+        data: { featuredUntil: order.plan === "GROWTH" ? planExpiry : null },
+      });
       return true;
     }
     const latest = await transaction.employerPayment.findUnique({ where: { id: order.id }, select: { status: true } });

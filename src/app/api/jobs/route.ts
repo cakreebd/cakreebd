@@ -7,6 +7,7 @@ import {
 } from "@/lib/auth";
 import { badRequest, readJson } from "@/lib/http";
 import { toPublicJob } from "@/lib/jobs";
+import { expireFeaturedJobs } from "@/lib/featured-jobs";
 import { EMPLOYER_PLANS, isEmployerPlan, type EmployerPlanKey } from "@/lib/employer-plans";
 import { prisma } from "@/lib/prisma";
 
@@ -25,6 +26,7 @@ const createJobSchema = z.object({
 });
 
 export async function GET(request: Request) {
+  await expireFeaturedJobs();
   const params = new URL(request.url).searchParams;
   const query = (params.get("q") ?? "").trim().slice(0, 120);
   const location = (params.get("location") ?? "").trim().slice(0, 100);
@@ -62,7 +64,10 @@ export async function GET(request: Request) {
   const [jobs, total] = await Promise.all([
     prisma.job.findMany({
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy: [
+        { featuredUntil: { sort: "desc", nulls: "last" } },
+        { createdAt: "desc" },
+      ],
       skip: (page - 1) * pageSize,
       take: pageSize,
       include: {
@@ -127,6 +132,10 @@ export async function POST(request: Request) {
       data: { plan: "FREE", expiresAt: null },
     });
     effectivePlan = "FREE";
+    await prisma.job.updateMany({
+      where: { employerId: user.id },
+      data: { featuredUntil: null },
+    });
   }
   const packageDetails = EMPLOYER_PLANS[effectivePlan];
   const job = await prisma.$transaction(async (transaction) => {
@@ -141,6 +150,7 @@ export async function POST(request: Request) {
         employerId: user.id,
         companyName,
         benefits: parsed.data.benefits || null,
+        featuredUntil: effectivePlan === "GROWTH" ? plan.expiresAt : null,
       },
     });
   });

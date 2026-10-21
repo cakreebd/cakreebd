@@ -23,10 +23,16 @@ export async function GET(request: Request) {
   let effectivePlan: EmployerPlanKey = plan.plan;
   let expiresAt = plan.expiresAt;
   if (effectivePlan !== "FREE" && (!expiresAt || expiresAt <= new Date())) {
-    await prisma.employerPlan.update({
-      where: { userId: user.id },
-      data: { plan: "FREE", expiresAt: null },
-    });
+    await prisma.$transaction([
+      prisma.employerPlan.update({
+        where: { userId: user.id },
+        data: { plan: "FREE", expiresAt: null },
+      }),
+      prisma.job.updateMany({
+        where: { employerId: user.id },
+        data: { featuredUntil: null },
+      }),
+    ]);
     effectivePlan = "FREE";
     expiresAt = null;
   }
@@ -52,10 +58,17 @@ export async function PUT(request: Request) {
   if (activeJobs > EMPLOYER_PLANS.FREE.activeJobLimit) {
     return NextResponse.json({ error: "Close active jobs until you are within the Free package limit before downgrading." }, { status: 409 });
   }
-  const plan = await prisma.employerPlan.upsert({
-    where: { userId: user.id },
-    create: { userId: user.id, plan: parsed.data.plan, expiresAt: null },
-    update: { plan: parsed.data.plan, expiresAt: null },
+  const plan = await prisma.$transaction(async (transaction) => {
+    const updatedPlan = await transaction.employerPlan.upsert({
+      where: { userId: user.id },
+      create: { userId: user.id, plan: parsed.data.plan, expiresAt: null },
+      update: { plan: parsed.data.plan, expiresAt: null },
+    });
+    await transaction.job.updateMany({
+      where: { employerId: user.id },
+      data: { featuredUntil: null },
+    });
+    return updatedPlan;
   });
   return NextResponse.json({
     plan: plan.plan,

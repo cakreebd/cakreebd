@@ -141,10 +141,16 @@ async function DashboardContent() {
   let effectiveEmployerPlan: EmployerPlanKey = employerPlan.plan;
   let planExpiresAt = employerPlan.expiresAt;
   if (effectiveEmployerPlan !== "FREE" && (!planExpiresAt || planExpiresAt <= new Date())) {
-    await prisma.employerPlan.update({
-      where: { userId: user.id },
-      data: { plan: "FREE", expiresAt: null },
-    });
+    await prisma.$transaction([
+      prisma.employerPlan.update({
+        where: { userId: user.id },
+        data: { plan: "FREE", expiresAt: null },
+      }),
+      prisma.job.updateMany({
+        where: { employerId: user.id },
+        data: { featuredUntil: null },
+      }),
+    ]);
     effectiveEmployerPlan = "FREE";
     planExpiresAt = null;
   }

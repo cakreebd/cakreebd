@@ -4,8 +4,10 @@ import type { Prisma } from "@prisma/client";
 import SaveJobButton from "@/components/save-job-button";
 import SiteHeader from "@/components/site-header";
 import VerifiedBadge from "@/components/verified-badge";
+import FeaturedBadge from "@/components/featured-badge";
 import { getCurrentUser } from "@/lib/auth";
 import { formatSalary, postedLabel } from "@/lib/jobs";
+import { expireFeaturedJobs } from "@/lib/featured-jobs";
 import { prisma } from "@/lib/prisma";
 
 type PageProps = {
@@ -23,6 +25,7 @@ export default function JobsPage({ searchParams }: PageProps) {
 
 async function JobsContent({ searchParams }: PageProps) {
   const [params, user] = await Promise.all([searchParams, getCurrentUser()]);
+  await expireFeaturedJobs();
   const get = (key: string) => {
     const value = params[key];
     return (Array.isArray(value) ? value[0] : value ?? "").trim().slice(0, 120);
@@ -60,7 +63,10 @@ async function JobsContent({ searchParams }: PageProps) {
   const [jobs, total, saved] = await Promise.all([
     prisma.job.findMany({
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy: [
+        { featuredUntil: { sort: "desc", nulls: "last" } },
+        { createdAt: "desc" },
+      ],
       skip: (page - 1) * pageSize,
       take: pageSize,
       include: {
@@ -131,10 +137,10 @@ async function JobsContent({ searchParams }: PageProps) {
         {jobs.length ? (
           <div className="search-results">
             {jobs.map((job) => (
-              <article className="result-card" key={job.id}>
+              <article className={`result-card${job.featuredUntil && job.featuredUntil > new Date() ? " result-card-featured" : ""}`} key={job.id}>
                 <div className="result-logo">{job.companyName.slice(0, 1).toUpperCase()}</div>
                 <div className="result-body">
-                  <div className="result-company">{job.companyName}{job.companyName === job.employer.companyName && job.employer.companyVerification?.status === "VERIFIED" && <VerifiedBadge />}<span className="job-posted">{postedLabel(job.createdAt)}</span></div>
+                  <div className="result-company">{job.companyName}{job.featuredUntil && job.featuredUntil > new Date() && <FeaturedBadge />}{job.companyName === job.employer.companyName && job.employer.companyVerification?.status === "VERIFIED" && <VerifiedBadge />}<span className="job-posted">{postedLabel(job.createdAt)}</span></div>
                   <h3><Link href={`/jobs/${job.id}`}>{job.title}</Link></h3>
                   <div className="result-meta"><span>{job.location}</span><span>{job.employmentType}</span><span>{job.workMode}</span><span>{job.category}</span></div>
                   <p className="result-description">{job.description}</p>
