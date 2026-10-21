@@ -2538,6 +2538,50 @@ button {
   align-items: center;
 }
 
+.verified-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  margin-left: 8px;
+  color: #176b4c;
+  background: #e9f4ed;
+  border: 1px solid #c9e4d2;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+.verification-state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #176b4c;
+}
+
+.verification-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.verification-details label {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+  color: #69766f;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.verification-details textarea {
+  width: min(100%, 420px);
+  padding: 9px 11px;
+  border: 1px solid #dce4de;
+  border-radius: 7px;
+  font: inherit;
+}
+
 @media print {
   .site-header,
   .resume-controls,

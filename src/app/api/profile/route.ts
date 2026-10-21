@@ -109,29 +109,54 @@ export async function PATCH(request: Request) {
   }
 
   const { skills, ...profileData } = parsed.data;
-  const profile = await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      ...profileData,
-      ...(skills ? { skills: JSON.stringify(skills) } : {}),
-    },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      phone: true,
-      location: true,
-      headline: true,
-      bio: true,
-      skills: true,
-      cvFileName: true,
-      companyName: true,
-      companyBio: true,
-      website: true,
-      profileVisible: true,
-      emailNotifications: true,
-    },
+  const profile = await prisma.$transaction(async (transaction) => {
+    const currentCompany = user.role === "EMPLOYER" && parsed.data.companyName !== undefined
+      ? await transaction.user.findUniqueOrThrow({
+          where: { id: user.id },
+          select: { companyName: true, companyVerification: { select: { status: true } } },
+        })
+      : null;
+    const updatedProfile = await transaction.user.update({
+      where: { id: user.id },
+      data: {
+        ...profileData,
+        ...(skills ? { skills: JSON.stringify(skills) } : {}),
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        phone: true,
+        location: true,
+        headline: true,
+        bio: true,
+        skills: true,
+        cvFileName: true,
+        companyName: true,
+        companyBio: true,
+        website: true,
+        profileVisible: true,
+        emailNotifications: true,
+      },
+    });
+    if (
+      currentCompany &&
+      currentCompany.companyName !== parsed.data.companyName &&
+      (currentCompany.companyVerification?.status === "VERIFIED" ||
+        currentCompany.companyVerification?.status === "PENDING")
+    ) {
+      await transaction.companyVerification.updateMany({
+        where: { employerId: user.id, status: { in: ["PENDING", "VERIFIED"] } },
+        data: {
+          status: "REJECTED",
+          reviewNote: "The company name changed. Submit updated registration details for review.",
+          reviewedAt: new Date(),
+          reviewedById: null,
+        },
+      });
+    }
+    return updatedProfile;
   });
   return NextResponse.json({ profile: { ...profile, skills: parseSkills(profile.skills) } });
 }

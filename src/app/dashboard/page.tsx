@@ -159,6 +159,15 @@ async function DashboardContent() {
       companyBio: true,
       website: true,
       emailNotifications: true,
+      companyVerification: {
+        select: {
+          legalCompanyName: true,
+          registrationAuthority: true,
+          registrationNumber: true,
+          status: true,
+          reviewNote: true,
+        },
+      },
       notifications: {
         where: { readAt: null },
         orderBy: { createdAt: "desc" },

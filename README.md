@@ -43,6 +43,7 @@ Use a separate job-seeker account to try candidate profiles, saved jobs, CV uplo
 - Employer job-posting packages with active-job limits
 - Candidate resume builder with printable / Save as PDF output
 - Verified company reviews, published after admin moderation
+- Employer company-registration submissions with admin-reviewed verification badges
 - Email updates for opted-in application/interview events and scheduled job-alert digests
 - Protected admin dashboard for reviewing content and suspending accounts or listings
 - bKash Tokenized Checkout for employer package purchases (requires merchant credentials)
@@ -87,3 +88,5 @@ Use credentials issued to your merchant account. Configure `BKASH_API_BASE_URL` 
 Set `CAKREE_ADMIN_EMAIL`, `CAKREE_ADMIN_NAME`, and `CAKREE_ADMIN_PASSWORD` (at least 16 characters) in the server environment, then run `npm run db:create-admin` once. This creates or resets only an existing administrator; it refuses to promote an ordinary account. Admin registration is not available through the public signup form.
 
 Company reviews may only be submitted by candidates whose application was marked hired, and remain private until approved by an administrator. Email delivery and bKash integration require production credentials and are not verified by local builds.
+
+Employers can request company verification from their dashboard by submitting their legal company name and registration details. Administrators review these details before a badge appears on public company pages and matching job listings. Registration numbers are not shown publicly.

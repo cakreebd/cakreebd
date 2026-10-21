@@ -42,6 +42,8 @@ model User {
   authoredReviews CompanyReview[] @relation("ReviewAuthor")
   companyReviews CompanyReview[] @relation("ReviewedCompany")
   paymentOrders EmployerPayment[]
+  companyVerification CompanyVerification?
+  reviewedVerifications CompanyVerification[] @relation("VerificationReviewer")
 
   @@index([role])
 }
@@ -158,6 +160,24 @@ model EmployerPlan {
   expiresAt DateTime?
   updatedAt DateTime @updatedAt
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CompanyVerification {
+  id                     String   @id @default(cuid())
+  employerId             String   @unique
+  legalCompanyName       String
+  registrationAuthority  String
+  registrationNumber     String
+  status                 String   @default("PENDING")
+  reviewNote             String?
+  submittedAt            DateTime @default(now())
+  reviewedAt             DateTime?
+  reviewedById            String?
+  employer                User     @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  reviewedBy              User?    @relation("VerificationReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([status, submittedAt])
+  @@index([reviewedById])
 }
 
 model CandidateResume {

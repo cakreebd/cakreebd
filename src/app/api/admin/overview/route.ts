@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Administrator access required." }, { status: 403 });
   }
 
-  const [users, jobs, reviews, counts] = await Promise.all([
+  const [users, jobs, reviews, verifications, counts] = await Promise.all([
     prisma.user.findMany({
       select: { id: true, name: true, email: true, role: true, isActive: true, createdAt: true },
       orderBy: { createdAt: "desc" },
@@ -37,10 +37,31 @@ export async function GET(request: Request) {
       orderBy: { createdAt: "asc" },
       take: 100,
     }),
+    prisma.companyVerification.findMany({
+      where: { status: "PENDING" },
+      select: {
+        id: true,
+        legalCompanyName: true,
+        registrationAuthority: true,
+        registrationNumber: true,
+        submittedAt: true,
+        employer: {
+          select: {
+            id: true,
+            email: true,
+            companyName: true,
+            website: true,
+          },
+        },
+      },
+      orderBy: { submittedAt: "asc" },
+      take: 100,
+    }),
     Promise.all([
       prisma.user.count(),
       prisma.job.count(),
       prisma.companyReview.count({ where: { status: "PENDING" } }),
+      prisma.companyVerification.count({ where: { status: "PENDING" } }),
     ]),
   ]);
 
@@ -48,6 +69,7 @@ export async function GET(request: Request) {
     users,
     jobs,
     pendingReviews: reviews,
-    counts: { users: counts[0], jobs: counts[1], pendingReviews: counts[2] },
+    pendingVerifications: verifications,
+    counts: { users: counts[0], jobs: counts[1], pendingReviews: counts[2], pendingVerifications: counts[3] },
   });
 }

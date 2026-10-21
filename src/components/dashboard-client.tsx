@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { EMPLOYER_PLANS, type EmployerPlanKey } from "@/lib/employer-plans";
+import VerifiedBadge from "@/components/verified-badge";
 
 type BasicJob = {
   id: number;
@@ -36,6 +37,13 @@ type EmployerProfile = {
   companyBio: string | null;
   website: string | null;
   emailNotifications: boolean;
+  companyVerification: {
+    legalCompanyName: string;
+    registrationAuthority: string;
+    registrationNumber: string;
+    status: string;
+    reviewNote: string | null;
+  } | null;
 };
 
 type CandidateInterview = {
@@ -471,6 +479,10 @@ function EmployerDashboard({
   const [companyName, setCompanyName] = useState(profile.companyName ?? "");
   const [companyBio, setCompanyBio] = useState(profile.companyBio ?? "");
   const [website, setWebsite] = useState(profile.website ?? "");
+  const [verification, setVerification] = useState(profile.companyVerification);
+  const [legalCompanyName, setLegalCompanyName] = useState(profile.companyVerification?.legalCompanyName ?? "");
+  const [registrationAuthority, setRegistrationAuthority] = useState(profile.companyVerification?.registrationAuthority ?? "RJSC");
+  const [registrationNumber, setRegistrationNumber] = useState(profile.companyVerification?.registrationNumber ?? "");
   const [emailNotifications, setEmailNotifications] = useState(profile.emailNotifications);
   const [plan, setPlan] = useState<EmployerPlanKey>(initialPlan);
   const [candidateResults, setCandidateResults] = useState<{
@@ -510,6 +522,34 @@ function EmployerDashboard({
         return;
       }
       setMessage("Company profile saved.");
+    } catch {
+      setError("Could not reach the server. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function submitVerification(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setBusy(true);
+    setError("");
+    setMessage("");
+    try {
+      const response = await fetch("/api/company-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ legalCompanyName, registrationAuthority, registrationNumber }),
+      });
+      const result = (await response.json()) as {
+        error?: string;
+        verification?: EmployerProfile["companyVerification"];
+      };
+      if (!response.ok || !result.verification) {
+        setError(result.error ?? "Your verification request could not be submitted.");
+        return;
+      }
+      setVerification(result.verification);
+      setMessage("Company registration details submitted for review.");
     } catch {
       setError("Could not reach the server. Please try again.");
     } finally {
@@ -782,6 +822,7 @@ function EmployerDashboard({
           </section>
           <section className="dashboard-card">
             <p className="section-kicker">YOUR COMPANY</p><h2>Company profile</h2>
+            {verification?.status === "VERIFIED" && <p className="verification-state"><VerifiedBadge /> Your company registration has been reviewed.</p>}
             {profile.companyName && <p><Link className="text-link" href={`/companies/${profile.id}`}>View public profile →</Link></p>}
             <form className="stacked-form company-form" onSubmit={saveCompany}>
               <label>Company name<input maxLength={120} minLength={2} onChange={(event) => setCompanyName(event.target.value)} required value={companyName} /></label>
@@ -790,6 +831,23 @@ function EmployerDashboard({
               <label className="visibility-option"><input checked={emailNotifications} className="visibility-checkbox" onChange={(event) => setEmailNotifications(event.target.checked)} type="checkbox" /> Send application and interview updates to this account by email.</label>
               <button className="button button-outline" disabled={busy} type="submit">Save company profile</button>
             </form>
+          </section>
+          <section className="dashboard-card">
+            <p className="section-kicker">BUILD TRUST</p><h2>Company verification</h2>
+            {verification?.status === "PENDING" && <p className="verification-state">Your request is awaiting admin review.</p>}
+            {verification?.status === "REJECTED" && <p className="form-error">Your request was not approved.{verification.reviewNote ? ` ${verification.reviewNote}` : " Update the details and submit again."}</p>}
+            {verification?.status !== "VERIFIED" && <form className="stacked-form company-form" onSubmit={submitVerification}>
+              <p>Submit your company’s registration details. Our team will review them before a verified badge is shown publicly. These details are visible only to administrators.</p>
+              <label>Legal company name<input maxLength={160} minLength={2} onChange={(event) => setLegalCompanyName(event.target.value)} required value={legalCompanyName} /></label>
+              <label>Registration authority<select onChange={(event) => setRegistrationAuthority(event.target.value)} value={registrationAuthority}>
+                <option value="RJSC">RJSC registration</option>
+                <option value="TRADE_LICENSE">Trade license</option>
+                <option value="TIN_BIN">TIN / BIN</option>
+                <option value="OTHER">Other</option>
+              </select></label>
+              <label>Registration number<input maxLength={100} minLength={3} onChange={(event) => setRegistrationNumber(event.target.value)} required value={registrationNumber} /></label>
+              <button className="button button-outline" disabled={busy} type="submit">{busy ? "Submitting..." : verification?.status === "REJECTED" ? "Resubmit for review" : verification?.status === "PENDING" ? "Update submitted details" : "Request verification"}</button>
+            </form>}
           </section>
         </aside>
       </div>

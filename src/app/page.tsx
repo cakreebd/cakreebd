@@ -18,6 +18,14 @@ async function HomeContent() {
       where: { status: "ACTIVE" },
       orderBy: { createdAt: "desc" },
       take: 8,
+      include: {
+        employer: {
+          select: {
+            companyName: true,
+            companyVerification: { select: { status: true } },
+          },
+        },
+      },
     }),
     user?.role === "JOB_SEEKER"
       ? prisma.savedJob.findMany({
@@ -31,6 +39,8 @@ async function HomeContent() {
     const publicJob = toPublicJob(job);
     return {
       ...publicJob,
+      companyVerified: job.companyName === job.employer.companyName &&
+        job.employer.companyVerification?.status === "VERIFIED",
       logo: publicJob.company.charAt(0).toLowerCase(),
       logoTone: logoTones[index % logoTones.length],
     };

@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import ApplyButton from "@/components/apply-button";
 import SaveJobButton from "@/components/save-job-button";
 import SiteHeader from "@/components/site-header";
+import VerifiedBadge from "@/components/verified-badge";
 import { getCurrentUser } from "@/lib/auth";
 import { formatSalary, parseTags, postedLabel } from "@/lib/jobs";
 import { prisma } from "@/lib/prisma";
@@ -23,7 +24,15 @@ async function JobDetailContent({ params }: PageProps) {
   const job = await prisma.job.findFirst({
     where: { id, status: "ACTIVE" },
     include: {
-      employer: { select: { id: true, companyName: true, companyBio: true, website: true } },
+      employer: {
+        select: {
+          id: true,
+          companyName: true,
+          companyBio: true,
+          website: true,
+          companyVerification: { select: { status: true } },
+        },
+      },
       applications: user?.role === "JOB_SEEKER"
         ? { where: { applicantId: user.id }, select: { id: true } }
         : false,
@@ -48,7 +57,7 @@ async function JobDetailContent({ params }: PageProps) {
           <article className="detail-card">
             <div className="detail-company-row">
               <span className="result-logo detail-logo">{job.companyName.slice(0, 1).toUpperCase()}</span>
-              <div>{hasCompanyProfile ? <Link className="result-company" href={`/companies/${job.employer.id}`}>{job.companyName}</Link> : <div className="result-company">{job.companyName}</div>}<p>{job.location} · Posted {postedLabel(job.createdAt)}</p></div>
+              <div>{hasCompanyProfile ? <Link className="result-company" href={`/companies/${job.employer.id}`}>{job.companyName}</Link> : <div className="result-company">{job.companyName}</div>}{hasCompanyProfile && job.employer.companyVerification?.status === "VERIFIED" && <VerifiedBadge />}<p>{job.location} · Posted {postedLabel(job.createdAt)}</p></div>
             </div>
             <h1>{job.title}</h1>
             <div className="result-meta"><span>{job.employmentType}</span><span>{job.workMode}</span><span>{job.category}</span><span>{job.location}</span></div>

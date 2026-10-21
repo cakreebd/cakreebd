@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import SiteHeader from "@/components/site-header";
+import VerifiedBadge from "@/components/verified-badge";
 import { getCurrentUser } from "@/lib/auth";
 import { formatSalary, parseTags } from "@/lib/jobs";
 import { prisma } from "@/lib/prisma";
@@ -22,6 +23,7 @@ async function CompanyContent({ params }: PageProps) {
       companyName: true,
       companyBio: true,
       website: true,
+      companyVerification: { select: { status: true } },
     },
   });
   if (!company?.companyName) notFound();
@@ -65,7 +67,7 @@ async function CompanyContent({ params }: PageProps) {
         <Link className="back-link" href="/jobs">← Back to job search</Link>
         <header className="page-heading">
           <p className="section-kicker">COMPANY PROFILE</p>
-          <h1>{company.companyName}</h1>
+          <h1>{company.companyName}{company.companyVerification?.status === "VERIFIED" && <VerifiedBadge />}</h1>
           {company.companyBio && <p>{company.companyBio}</p>}
           {company.website && <p><a className="text-link" href={company.website} rel="noreferrer" target="_blank">Visit company website ↗</a></p>}
         </header>

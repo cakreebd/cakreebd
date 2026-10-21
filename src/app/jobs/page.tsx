@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import type { Prisma } from "@prisma/client";
 import SaveJobButton from "@/components/save-job-button";
 import SiteHeader from "@/components/site-header";
+import VerifiedBadge from "@/components/verified-badge";
 import { getCurrentUser } from "@/lib/auth";
 import { formatSalary, postedLabel } from "@/lib/jobs";
 import { prisma } from "@/lib/prisma";
@@ -57,7 +58,20 @@ async function JobsContent({ searchParams }: PageProps) {
     ...(minSalary ? { salaryMax: { gte: minSalary } } : {}),
   };
   const [jobs, total, saved] = await Promise.all([
-    prisma.job.findMany({ where, orderBy: { createdAt: "desc" }, skip: (page - 1) * pageSize, take: pageSize }),
+    prisma.job.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      include: {
+        employer: {
+          select: {
+            companyName: true,
+            companyVerification: { select: { status: true } },
+          },
+        },
+      },
+    }),
     prisma.job.count({ where }),
     user?.role === "JOB_SEEKER"
       ? prisma.savedJob.findMany({ where: { userId: user.id }, select: { jobId: true } })
@@ -120,7 +134,7 @@ async function JobsContent({ searchParams }: PageProps) {
               <article className="result-card" key={job.id}>
                 <div className="result-logo">{job.companyName.slice(0, 1).toUpperCase()}</div>
                 <div className="result-body">
-                  <div className="result-company">{job.companyName}<span className="job-posted">{postedLabel(job.createdAt)}</span></div>
+                  <div className="result-company">{job.companyName}{job.companyName === job.employer.companyName && job.employer.companyVerification?.status === "VERIFIED" && <VerifiedBadge />}<span className="job-posted">{postedLabel(job.createdAt)}</span></div>
                   <h3><Link href={`/jobs/${job.id}`}>{job.title}</Link></h3>
                   <div className="result-meta"><span>{job.location}</span><span>{job.employmentType}</span><span>{job.workMode}</span><span>{job.category}</span></div>
                   <p className="result-description">{job.description}</p>

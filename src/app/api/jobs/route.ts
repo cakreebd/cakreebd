@@ -65,12 +65,24 @@ export async function GET(request: Request) {
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
       take: pageSize,
+      include: {
+        employer: {
+          select: {
+            companyName: true,
+            companyVerification: { select: { status: true } },
+          },
+        },
+      },
     }),
     prisma.job.count({ where }),
   ]);
 
   return NextResponse.json({
-    jobs: jobs.map(toPublicJob),
+    jobs: jobs.map((job) => ({
+      ...toPublicJob(job),
+      companyVerified: job.companyName === job.employer.companyName &&
+        job.employer.companyVerification?.status === "VERIFIED",
+    })),
     pagination: { page, pageSize, total, totalPages: Math.ceil(total / pageSize) },
   });
 }
