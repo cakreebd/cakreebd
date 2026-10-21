@@ -1,5 +1,4 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { NextResponse } from "next/server";
 import {
@@ -7,21 +6,10 @@ import {
   roleRequiredResponse,
   unauthorizedResponse,
 } from "@/lib/auth";
+import { readCv, removeCv, saveCv } from "@/lib/cv-storage";
 import { prisma } from "@/lib/prisma";
 
 const MAX_CV_BYTES = 5 * 1024 * 1024;
-const CV_DIRECTORY = path.join(process.cwd(), "storage", "cvs");
-
-async function removeStoredCv(storageKey: string | null) {
-  if (!storageKey || path.basename(storageKey) !== storageKey) return;
-  try {
-    await unlink(path.join(CV_DIRECTORY, storageKey));
-  } catch (error) {
-    if (!(error instanceof Error) || !("code" in error) || error.code !== "ENOENT") {
-      throw error;
-    }
-  }
-}
 
 export async function POST(request: Request) {
   const user = await currentUserFromRequest(request);
@@ -66,23 +54,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "The file contents do not match its file type." }, { status: 400 });
   }
 
-  await mkdir(CV_DIRECTORY, { recursive: true });
   const storageKey = `${randomUUID()}${extension}`;
-  await writeFile(path.join(CV_DIRECTORY, storageKey), bytes, { flag: "wx" });
+  const contentType = isPdf
+    ? "application/pdf"
+    : "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
   const previous = await prisma.user.findUniqueOrThrow({
     where: { id: user.id },
     select: { cvStorageKey: true },
   });
+  await saveCv(storageKey, bytes, contentType);
   try {
     await prisma.user.update({
       where: { id: user.id },
       data: { cvStorageKey: storageKey, cvFileName: path.basename(file.name).slice(0, 180) },
     });
   } catch (error) {
-    await removeStoredCv(storageKey);
+    await removeCv(storageKey);
     throw error;
   }
-  await removeStoredCv(previous.cvStorageKey);
+  await removeCv(previous.cvStorageKey);
   return NextResponse.json({ fileName: path.basename(file.name).slice(0, 180) }, { status: 201 });
 }
 
@@ -98,17 +88,12 @@ export async function GET(request: Request) {
   if (!profile.cvStorageKey || !profile.cvFileName) {
     return NextResponse.json({ error: "No CV has been uploaded." }, { status: 404 });
   }
-  if (path.basename(profile.cvStorageKey) !== profile.cvStorageKey) {
-    throw new Error("Invalid stored CV key.");
-  }
-  const file = await readFile(path.join(CV_DIRECTORY, profile.cvStorageKey));
-  const contentType = profile.cvStorageKey.endsWith(".pdf")
-    ? "application/pdf"
-    : "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-  return new Response(new Uint8Array(file), {
+  const file = await readCv(profile.cvStorageKey);
+  if (!file) return NextResponse.json({ error: "The stored CV could not be found." }, { status: 404 });
+  return new Response(file.body, {
     headers: {
-      "Content-Type": contentType,
-      "Content-Length": String(file.byteLength),
+      "Content-Type": file.contentType,
+      "Content-Length": String(file.contentLength),
       "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(profile.cvFileName)}`,
       "Cache-Control": "private, no-store",
       "X-Content-Type-Options": "nosniff",
@@ -128,6 +113,6 @@ export async function DELETE(request: Request) {
     where: { id: user.id },
     data: { cvStorageKey: null, cvFileName: null },
   });
-  await removeStoredCv(profile.cvStorageKey);
+  await removeCv(profile.cvStorageKey);
   return NextResponse.json({ success: true });
 }

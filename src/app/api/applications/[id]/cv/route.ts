@@ -1,11 +1,10 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
 import { NextResponse } from "next/server";
 import {
   currentUserFromRequest,
   roleRequiredResponse,
   unauthorizedResponse,
 } from "@/lib/auth";
+import { readCv } from "@/lib/cv-storage";
 import { prisma } from "@/lib/prisma";
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -32,18 +31,12 @@ export async function GET(request: Request, { params }: RouteContext) {
   if (!cvFileName || !cvStorageKey) {
     return NextResponse.json({ error: "This applicant has not uploaded a CV." }, { status: 404 });
   }
-  if (path.basename(cvStorageKey) !== cvStorageKey) {
-    throw new Error("Invalid stored CV key.");
-  }
-
-  const file = await readFile(path.join(process.cwd(), "storage", "cvs", cvStorageKey));
-  const contentType = cvStorageKey.endsWith(".pdf")
-    ? "application/pdf"
-    : "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-  return new Response(new Uint8Array(file), {
+  const file = await readCv(cvStorageKey);
+  if (!file) return NextResponse.json({ error: "The stored CV could not be found." }, { status: 404 });
+  return new Response(file.body, {
     headers: {
-      "Content-Type": contentType,
-      "Content-Length": String(file.byteLength),
+      "Content-Type": file.contentType,
+      "Content-Length": String(file.contentLength),
       "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(cvFileName)}`,
       "Cache-Control": "private, no-store",
       "X-Content-Type-Options": "nosniff",

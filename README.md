@@ -1,10 +1,10 @@
 # Cakree
 
-Cakree is a Bangladesh-focused job portal MVP built with Next.js, TypeScript, Prisma, and SQLite. Job seekers can create profiles, upload a CV, save roles, and apply. Employers can create a company profile, publish or close openings, review applications, schedule interviews, and update candidate statuses.
+Cakree is a Bangladesh-focused job portal built with Next.js, TypeScript, Prisma, and PostgreSQL. Job seekers can create profiles, upload a CV, save roles, and apply. Employers can create a company profile, publish or close openings, review applications, schedule interviews, and update candidate statuses.
 
 ## Run locally
 
-Use Node.js 22.13 or later, then install dependencies and create the local database:
+Use Node.js 22.13 or later and create a PostgreSQL database (for example, a Neon development database). Add its connection URLs to `.env`, then install dependencies and initialize the database:
 
 ```bash
 npm install
@@ -15,6 +15,8 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+`DATABASE_URL` is the runtime connection string. `DIRECT_URL` is used by Prisma Migrate; for Neon, use its pooled URL for `DATABASE_URL` and its direct URL for `DIRECT_URL`. For a local PostgreSQL server, both can use the same direct URL.
 
 On macOS or Linux, copy `.env.example` to `.env` with `cp .env.example .env`.
 
@@ -31,7 +33,7 @@ Use a separate job-seeker account to try candidate profiles, saved jobs, CV uplo
 
 - Account registration and sign-in for job seekers and employers
 - Database-backed sessions using secure, HTTP-only cookies
-- Candidate profile, skills, preferred location, and CV upload (PDF/DOCX, maximum 5 MB)
+- Candidate profile, skills, preferred location, and private CV upload (PDF/DOCX, maximum 5 MB; local files in development, private Vercel Blob in deployments)
 - Persistent saved jobs and job applications with optional cover letters
 - Employer company profile, job posting, job status management, and application review
 - Public company pages with active openings
@@ -53,11 +55,22 @@ Use a separate job-seeker account to try candidate profiles, saved jobs, CV uplo
 - `npm run dev` — start the development server
 - `npm run lint` — run ESLint
 - `npm run build` — create a production build
-- `npm run db:migrate` — apply or create a Prisma migration
+- `npm run db:migrate` — create/apply a PostgreSQL development migration
+- `npm run db:deploy` — apply committed migrations to a production database
 - `npm run db:seed` — add sample jobs and the local demo employer
 - `npm run db:create-admin` — create or reset a protected administrator account using environment variables
 
-SQLite data is stored in `prisma/dev.db`, and uploaded CVs are stored privately in `storage/cvs/`. Both paths are excluded from source control. For production, configure a managed database and private object storage; the local filesystem is intended for development and single-instance deployment only. Replace the demo data and credentials before deploying.
+The application now uses PostgreSQL. Existing local SQLite data is not migrated automatically; the SQLite database file is left untouched, but it cannot be used by this PostgreSQL configuration. CV files use the local filesystem in development unless `BLOB_READ_WRITE_TOKEN` or `BLOB_STORE_ID` is configured. Production uses private Vercel Blob storage and requires a private Blob store connected to the Vercel project. Local database files and uploaded files are excluded from source control.
+
+## Deploy to Vercel
+
+1. Create a PostgreSQL database (Neon is supported) and a **private** Vercel Blob store.
+2. Import this GitHub repository into Vercel.
+3. Configure `DATABASE_URL`, `DIRECT_URL`, `SITE_URL`, and the existing integration environment variables in Vercel. For Neon, use the pooled connection URL for `DATABASE_URL` and the direct connection URL for `DIRECT_URL`. Keep all secrets server-side.
+4. Connect the private Blob store to the Vercel project and enable it for Production, Preview, and Development as needed. Vercel supplies Blob access to connected deployments; local runs may use `BLOB_READ_WRITE_TOKEN`.
+5. Apply the initial database migration to the production database with `npm run db:deploy` using the production `DIRECT_URL`, then deploy the app. Do not run `db:seed` in production.
+
+Preview deployments should use a separate PostgreSQL database/branch from production. The first PostgreSQL migration is a fresh baseline; it does not import data from the previous local SQLite database.
 
 Employer package prices are shown in Bangladeshi taka. Paid package entitlements are granted only after bKash payment verification; checkout requires merchant credentials and a public HTTPS callback URL.
 

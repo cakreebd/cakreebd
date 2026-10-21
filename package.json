@@ -8,11 +8,13 @@
     "start": "next start",
     "lint": "eslint",
     "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "db:create-admin": "tsx prisma/create-admin.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
+    "@vercel/blob": "^2.8.2",
     "bcryptjs": "^3.0.3",
     "next": "16.4.2",
     "react": "19.3.0",
