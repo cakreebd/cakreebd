@@ -48,7 +48,9 @@ Use a separate job-seeker account to try candidate profiles, saved jobs, CV uplo
 - Protected admin dashboard for reviewing content and suspending accounts or listings
 - bKash Tokenized Checkout for employer package purchases (requires merchant credentials)
 - Authorized employer access to a candidate CV only for that employer's application
-- Search by keyword, location, category, job type, work arrangement, and minimum monthly BDT salary
+- Search by keyword, location, category, job type, work arrangement, monthly BDT salary range, posting date, and salary-based sorting
+- Homepage discovery by job category and Bangladesh location
+- Employer hiring pipeline with application-stage metrics and contextual next actions
 - Dedicated job detail pages and paginated results
 
 ## Scripts
@@ -59,6 +61,7 @@ Use a separate job-seeker account to try candidate profiles, saved jobs, CV uplo
 - `npm run db:migrate` — create/apply a PostgreSQL development migration
 - `npm run db:deploy` — apply committed migrations to a production database
 - `npm run db:seed` — add sample jobs and the local demo employer
+- `npm run db:seed-demo` — add or refresh clearly labeled fictional preview listings across varied roles and employment types in the configured database; requires `CAKREE_DEMO_SEED_CONFIRMATION=YES_ADD_DEMO_CONTENT_TO_THIS_DATABASE`
 - `npm run db:create-admin` — create or reset a protected administrator account using environment variables
 - `npm run db:promote-admin -- cakreebd@gmail.com` — grant admin access to that existing account without changing its password
 
@@ -70,7 +73,7 @@ The application now uses PostgreSQL. Existing local SQLite data is not migrated 
 2. Import this GitHub repository into Vercel.
 3. Confirm the database integration provides `DATABASE_URL` for Production. Configure `SITE_URL` and the existing integration environment variables in Vercel. Keep all secrets server-side.
 4. Connect the private Blob store to the Vercel project and enable it for Production, Preview, and Development as needed. Vercel supplies Blob access to connected deployments; local runs may use `BLOB_READ_WRITE_TOKEN`.
-5. Deploy the app. On Vercel Production builds, the build command automatically applies pending migrations with `prisma migrate deploy` before building the app. Preview builds do not run production migrations. Do not run `db:seed` in production.
+5. Deploy the app. On Vercel Production builds, the build command automatically applies pending migrations with `prisma migrate deploy` before building the app. Preview builds do not run production migrations. Do not run `db:seed` in production. The separately gated `db:seed-demo` command creates fictional employers and sample jobs in the database selected by `DATABASE_URL`; demo jobs are marked and cannot accept applications.
 
 Preview deployments should use a separate PostgreSQL database/branch from production. The first PostgreSQL migration is a fresh baseline; it does not import data from the previous local SQLite database.
 

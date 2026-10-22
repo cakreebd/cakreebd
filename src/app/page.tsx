@@ -4,6 +4,7 @@ import SiteHeader from "@/components/site-header";
 import { getCurrentUser } from "@/lib/auth";
 import { toPublicJob } from "@/lib/jobs";
 import { expireFeaturedJobs } from "@/lib/featured-jobs";
+import { DEMO_COMPANY_PREFIX, isDemoCompany } from "@/lib/demo-content";
 import { prisma } from "@/lib/prisma";
 
 const logoTones = ["coral", "pink", "orange", "navy", "green", "blue", "teal", "purple"];
@@ -39,20 +40,33 @@ async function HomeContent() {
           select: { jobId: true },
         })
       : Promise.resolve([]),
-    prisma.job.count({ where: { status: "ACTIVE" } }),
-    prisma.user.count({
-      where: { role: "EMPLOYER", jobs: { some: { status: "ACTIVE" } } },
+    prisma.job.count({
+      where: {
+        status: "ACTIVE",
+        NOT: { companyName: { startsWith: DEMO_COMPANY_PREFIX } },
+      },
     }),
     prisma.user.count({
       where: {
         role: "EMPLOYER",
-        jobs: { some: { status: "ACTIVE" } },
+        NOT: { companyName: { startsWith: DEMO_COMPANY_PREFIX } },
+        jobs: { some: { status: "ACTIVE", NOT: { companyName: { startsWith: DEMO_COMPANY_PREFIX } } } },
+      },
+    }),
+    prisma.user.count({
+      where: {
+        role: "EMPLOYER",
+        NOT: { companyName: { startsWith: DEMO_COMPANY_PREFIX } },
+        jobs: { some: { status: "ACTIVE", NOT: { companyName: { startsWith: DEMO_COMPANY_PREFIX } } } },
         companyVerification: { is: { status: "VERIFIED" } },
       },
     }),
     prisma.job.groupBy({
       by: ["category"],
-      where: { status: "ACTIVE" },
+      where: {
+        status: "ACTIVE",
+        NOT: { companyName: { startsWith: DEMO_COMPANY_PREFIX } },
+      },
       _count: { _all: true },
     }),
     prisma.user.findMany({
@@ -75,6 +89,7 @@ async function HomeContent() {
     const publicJob = toPublicJob(job);
     return {
       ...publicJob,
+      demo: isDemoCompany(job.companyName),
       companyVerified: job.companyName === job.employer.companyName &&
         job.employer.companyVerification?.status === "VERIFIED",
       logo: publicJob.company.charAt(0).toLowerCase(),

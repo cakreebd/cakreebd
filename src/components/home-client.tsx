@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import VerifiedBadge from "@/components/verified-badge";
 import FeaturedBadge from "@/components/featured-badge";
+import DemoBadge from "@/components/demo-badge";
 
 export type Job = {
   id: number;
@@ -21,6 +22,7 @@ export type Job = {
   logo: string;
   logoTone: string;
   featured?: boolean;
+  demo?: boolean;
   description: string;
   requirements: string;
   tags: string[];
@@ -48,6 +50,14 @@ const categories = [
 ];
 
 const locations = ["All locations", "Dhaka", "Chattogram", "Sylhet", "Remote"];
+const popularLocations = [
+  { name: "Dhaka", detail: "Opportunities across the capital" },
+  { name: "Chattogram", detail: "Roles near the port city" },
+  { name: "Sylhet", detail: "Explore work in the northeast" },
+  { name: "Rajshahi", detail: "Find openings in the northwest" },
+  { name: "Khulna", detail: "Discover local opportunities" },
+  { name: "Remote", detail: "Work from anywhere in Bangladesh" },
+];
 
 function Icon({
   name,
@@ -347,6 +357,25 @@ export default function HomeClient({
         </div>
       </section>
 
+      <section aria-labelledby="location-title" className="section location-section">
+        <div className="section-heading">
+          <div>
+            <p className="section-kicker">OPPORTUNITIES NEAR YOU</p>
+            <h2 id="location-title">Explore jobs by location</h2>
+          </div>
+          <p className="section-description">Search across Bangladesh, or find flexible work you can do from anywhere.</p>
+        </div>
+        <div className="location-grid">
+          {popularLocations.map((item) => (
+            <Link className="location-card" href={`/jobs?location=${encodeURIComponent(item.name)}`} key={item.name}>
+              <span className="location-card-mark"><Icon name="pin" /></span>
+              <span><strong>{item.name}</strong><small>{item.detail}</small></span>
+              <Icon className="location-card-arrow h-4 w-4" name="arrow" />
+            </Link>
+          ))}
+        </div>
+      </section>
+
       <section aria-labelledby="jobs-title" className="section jobs-section" id="jobs">
         <div className="section-heading jobs-heading">
           <div>
@@ -356,7 +385,7 @@ export default function HomeClient({
           </div>
           <Link className="text-link" href="/jobs">Browse all jobs <Icon className="h-4 w-4" name="arrow" /></Link>
         </div>
-        <p className="demo-notice">Sample listings are included to preview Cakree. Employers can publish real openings from their dashboard.</p>
+        <p className="demo-notice">Listings marked DEMO are fictional examples for preview only; applications are disabled. Employers can publish real openings from their dashboard.</p>
         {saveError && <p className="form-error" role="alert">{saveError}</p>}
         {filteredJobs.length > 0 ? (
           <div className="job-grid">
@@ -374,7 +403,7 @@ export default function HomeClient({
                     <Icon name="bookmark" />
                   </button>
                 </div>
-                <div className="job-company">{job.company}{job.featured && <FeaturedBadge />}{job.companyVerified && <VerifiedBadge />}<span className="job-posted">{job.posted}</span></div>
+                <div className="job-company">{job.company}{job.demo && <DemoBadge />}{job.featured && <FeaturedBadge />}{job.companyVerified && <VerifiedBadge />}<span className="job-posted">{job.posted}</span></div>
                 <h3>{job.title}</h3>
                 <div className="job-meta">
                   <span><Icon name="pin" />{job.location}</span>

@@ -832,6 +832,26 @@ function EmployerDashboard({
     { value: "SHORTLISTED", label: "Shortlisted", count: shortlistedCount },
     { value: "HIRED", label: "Hired", count: allApplications.filter((application) => application.status === "HIRED").length },
   ];
+  const hiringFocus = inReviewCount > 0
+    ? {
+        title: `${inReviewCount} application${inReviewCount === 1 ? "" : "s"} need your attention.`,
+        description: "Review new candidates and keep your hiring pipeline moving.",
+        href: "#employer-applications",
+        action: "Review applicants",
+      }
+    : activeJobCount === 0
+      ? {
+          title: "Your next great hire starts with a job post.",
+          description: "Share an opening with candidates across Bangladesh.",
+          href: "#employer-post-job",
+          action: "Post your first job",
+        }
+      : {
+          title: "Your active openings are ready for candidates.",
+          description: "Search profiles from job seekers who opted into employer discovery.",
+          href: "#employer-candidates",
+          action: "Find candidates",
+        };
 
   return (
     <main className="dashboard-shell">
@@ -849,6 +869,10 @@ function EmployerDashboard({
       </nav>
       {(error || message || paymentMessage) && <p className={error ? "form-error" : "form-success"} role={error ? "alert" : "status"}>{error || message || paymentMessage}</p>}
       <div className="employer-stats"><div><strong>{activeJobCount}</strong><span>Active jobs</span></div><div><strong>{totalApplications}</strong><span>Applications</span></div><div><strong>{inReviewCount}</strong><span>To review</span></div><div><strong>{shortlistedCount}</strong><span>Shortlisted</span></div></div>
+      <div className="hiring-focus">
+        <div><strong>{hiringFocus.title}</strong><p>{hiringFocus.description}</p></div>
+        <a href={hiringFocus.href}>{hiringFocus.action} →</a>
+      </div>
       <section aria-label="Hiring pipeline" className="hiring-pipeline">
         <div className="hiring-pipeline-heading"><div><p className="section-kicker">HIRING PIPELINE</p><h2>See where candidates are</h2></div><a href="#employer-applications">Manage applicants <span aria-hidden="true">→</span></a></div>
         <div className="hiring-pipeline-stages">
@@ -870,6 +894,7 @@ function EmployerDashboard({
               <label>Work arrangement<select name="workMode">{["On-site", "Hybrid", "Remote"].map((item) => <option key={item}>{item}</option>)}</select></label>
               <label>Minimum salary (BDT / month)<input min="0" name="salaryMin" placeholder="e.g. 50000" type="number" /></label>
               <label>Maximum salary (BDT / month)<input min="0" name="salaryMax" placeholder="e.g. 80000" type="number" /></label>
+              <p className="label-hint full-width">Enter monthly amounts in Bangladeshi taka (৳). Leave both blank if the salary is negotiable.</p>
               <label className="full-width">Role description<textarea minLength={30} name="description" placeholder="Describe the role and what success looks like." required rows={5} /></label>
               <label className="full-width">Requirements<textarea minLength={10} name="requirements" placeholder="What experience and skills are you looking for?" required rows={4} /></label>
               <label className="full-width">Benefits <span className="label-hint">Optional</span><textarea name="benefits" placeholder="Benefits, leave, learning, and other perks." rows={3} /></label>
@@ -897,7 +922,7 @@ function EmployerDashboard({
               });
               return (
               <article className="employer-job-card" key={job.id}>
-                <div className="employer-job-heading"><div><h3><Link href={`/jobs/${job.id}`}>{job.title}</Link>{job.featured && <FeaturedBadge />}</h3><p>{job.location} · {job.employment}</p></div><span className={`status-pill status-${job.status.toLowerCase()}`}>{statusLabel(job.status)}</span></div>
+                <div className="employer-job-heading"><div><h3><Link href={`/jobs/${job.id}`}>{job.title}</Link>{job.featured && <FeaturedBadge />}</h3><p>{job.location} · {job.employment} · {job.salary} / month</p></div><span className={`status-pill status-${job.status.toLowerCase()}`}>{statusLabel(job.status)}</span></div>
                 <div className="applicant-list-heading"><strong>{visibleApplications.length}{visibleApplications.length !== job.applications.length ? ` of ${job.applications.length}` : ""} {visibleApplications.length === 1 ? "application" : "applications"}</strong><button className="subtle-button" onClick={() => updateJobStatus(job.id, job.status === "ACTIVE" ? "CLOSED" : "ACTIVE")} type="button">{job.status === "ACTIVE" ? "Close job" : "Reopen job"}</button></div>
                 {visibleApplications.length > 0 ? <div className="applicant-list">{visibleApplications.map((application) => (
                   <div className="applicant-row" key={application.id}>

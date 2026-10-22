@@ -8,6 +8,7 @@ import {
 import { badRequest, notFound, readJson } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
 import { escapeHtml, sendEmail, siteUrl } from "@/lib/email";
+import { isDemoCompany } from "@/lib/demo-content";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -29,6 +30,9 @@ export async function POST(request: Request, { params }: RouteContext) {
 
   const job = await prisma.job.findFirst({ where: { id, status: "ACTIVE" } });
   if (!job) return notFound("This job is no longer available.");
+  if (isDemoCompany(job.companyName)) {
+    return NextResponse.json({ error: "Applications are disabled for fictional demo listings." }, { status: 409 });
+  }
   const existing = await prisma.jobApplication.findUnique({
     where: { jobId_applicantId: { jobId: id, applicantId: user.id } },
     select: { id: true },

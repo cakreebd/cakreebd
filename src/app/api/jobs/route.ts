@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { Prisma } from "@prisma/client";
 import { z } from "zod";
 import {
   currentUserFromRequest,
@@ -6,7 +7,7 @@ import {
   unauthorizedResponse,
 } from "@/lib/auth";
 import { badRequest, readJson } from "@/lib/http";
-import { toPublicJob } from "@/lib/jobs";
+import { dateDaysAgo, toPublicJob } from "@/lib/jobs";
 import { expireFeaturedJobs } from "@/lib/featured-jobs";
 import { EMPLOYER_PLANS, isEmployerPlan, type EmployerPlanKey } from "@/lib/employer-plans";
 import { prisma } from "@/lib/prisma";
@@ -37,37 +38,73 @@ export async function GET(request: Request) {
   const minSalary = Number.isFinite(minSalaryValue) && minSalaryValue > 0
     ? Math.floor(minSalaryValue)
     : undefined;
+  const maxSalaryValue = Number(params.get("maxSalary"));
+  const maxSalary = Number.isFinite(maxSalaryValue) && maxSalaryValue > 0
+    ? Math.floor(maxSalaryValue)
+    : undefined;
+  const requestedPostedWithin = params.get("postedWithin");
+  const postedWithin = ["1", "7", "30"].includes(requestedPostedWithin ?? "")
+    ? Number(requestedPostedWithin)
+    : undefined;
+  const postedAfter = postedWithin
+    ? dateDaysAgo(postedWithin)
+    : undefined;
+  const requestedSort = params.get("sort");
+  const sort = requestedSort === "salary-high" || requestedSort === "salary-low"
+    ? requestedSort
+    : "newest";
   const pageValue = Number(params.get("page") ?? 1);
   const page = Number.isFinite(pageValue) ? Math.max(1, Math.floor(pageValue)) : 1;
   const pageSize = 12;
 
-  const where = {
+  const searchConditions: Prisma.JobWhereInput[] = [];
+  if (query) {
+    searchConditions.push({
+      OR: [
+        { title: { contains: query } },
+        { companyName: { contains: query } },
+        { description: { contains: query } },
+        { requirements: { contains: query } },
+        { tags: { contains: query } },
+      ],
+    });
+  }
+  if (location === "Remote") {
+    searchConditions.push({
+      OR: [{ location: { contains: "Remote" } }, { workMode: "Remote" }],
+    });
+  }
+  const where: Prisma.JobWhereInput = {
     status: "ACTIVE",
-    ...(query
-      ? {
-          OR: [
-            { title: { contains: query } },
-            { companyName: { contains: query } },
-            { description: { contains: query } },
-            { requirements: { contains: query } },
-            { tags: { contains: query } },
-          ],
-        }
-      : {}),
-    ...(location ? { location: { contains: location } } : {}),
+    ...(searchConditions.length > 0 ? { AND: searchConditions } : {}),
+    ...(location && location !== "Remote" ? { location: { contains: location } } : {}),
     ...(category ? { category } : {}),
     ...(employmentType ? { employmentType } : {}),
     ...(workMode ? { workMode } : {}),
     ...(minSalary ? { salaryMax: { gte: minSalary } } : {}),
+    ...(maxSalary ? { salaryMin: { lte: maxSalary } } : {}),
+    ...(postedAfter ? { createdAt: { gte: postedAfter } } : {}),
   };
 
   const [jobs, total] = await Promise.all([
     prisma.job.findMany({
       where,
-      orderBy: [
-        { featuredUntil: { sort: "desc", nulls: "last" } },
-        { createdAt: "desc" },
-      ],
+      orderBy: sort === "salary-high"
+        ? [
+            { featuredUntil: { sort: "desc", nulls: "last" } },
+            { salaryMax: { sort: "desc", nulls: "last" } },
+            { createdAt: "desc" },
+          ]
+        : sort === "salary-low"
+          ? [
+              { featuredUntil: { sort: "desc", nulls: "last" } },
+              { salaryMin: { sort: "asc", nulls: "last" } },
+              { createdAt: "desc" },
+            ]
+          : [
+              { featuredUntil: { sort: "desc", nulls: "last" } },
+              { createdAt: "desc" },
+            ],
       skip: (page - 1) * pageSize,
       take: pageSize,
       include: {

@@ -21,6 +21,10 @@ export function formatSalary(min: number | null, max: number | null) {
   return "Negotiable";
 }
 
+export function dateDaysAgo(days: number) {
+  return new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+}
+
 export function postedLabel(date: Date) {
   const elapsedDays = Math.floor(
     (Date.now() - date.getTime()) / (1000 * 60 * 60 * 24),
