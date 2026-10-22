@@ -105,7 +105,7 @@ async function JobDetailContent({ params }: PageProps) {
               <span className="result-logo detail-logo">{job.companyName.slice(0, 1).toUpperCase()}</span>
               <div>{hasCompanyProfile ? <Link className="result-company" href={`/companies/${job.employer.id}`}>{job.companyName}</Link> : <div className="result-company">{job.companyName}</div>}{isDemo && <DemoBadge />}{hasCompanyProfile && job.employer.companyVerification?.status === "VERIFIED" && <VerifiedBadge />}<p>{job.location} · Posted {postedLabel(job.createdAt)}</p></div>
             </div>
-            <h1>{job.title}{job.featuredUntil && job.featuredUntil > new Date() && <FeaturedBadge />}</h1>
+            <h2>{job.title}{job.featuredUntil && job.featuredUntil > new Date() && <FeaturedBadge />}</h2>
             {isDemo && <p className="demo-job-warning" role="note">This is a fictional sample listing for preview purposes, not a real vacancy. Applications are disabled for demo jobs.</p>}
             <div className="result-meta"><span>{job.employmentType}</span><span>{job.workMode}</span><span>{job.category}</span><span>{job.location}</span></div>
             <p className="detail-salary">{formatSalary(job.salaryMin, job.salaryMax)} <small>per month</small></p>

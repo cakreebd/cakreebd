@@ -29,7 +29,7 @@ body {
   background: var(--page);
   color: var(--ink);
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 15px;
+  font-size: 17px;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -85,7 +85,7 @@ button {
   align-items: center;
   gap: 9px;
   flex-shrink: 0;
-  font-size: 23px;
+  font-size: 25px;
   font-weight: 750;
   letter-spacing: -1.2px;
 }
@@ -115,7 +115,7 @@ button {
   position: relative;
   padding: 30px 0 27px;
   color: #69766f;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   transition: color 160ms ease;
 }
@@ -144,7 +144,7 @@ button {
 
 .login-link {
   color: #425049;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 650;
 }
 
@@ -158,7 +158,7 @@ button {
   border: 1px solid transparent;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
 }
@@ -171,7 +171,7 @@ button {
   min-height: 40px;
   padding: 0 17px;
   border-radius: 7px;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .button-dark {
@@ -226,7 +226,7 @@ button {
 .eyebrow,
 .section-kicker {
   color: #5d8970;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 750;
   letter-spacing: 1.45px;
 }
@@ -247,7 +247,7 @@ button {
 .hero h1 {
   margin: 16px 0 14px;
   color: #1c2c23;
-  font-size: clamp(40px, 4.1vw, 56px);
+  font-size: clamp(42px, 4.1vw, 58px);
   font-weight: 650;
   letter-spacing: -2.7px;
   line-height: 1.12;
@@ -261,7 +261,7 @@ button {
   max-width: 470px;
   margin: 0;
   color: #69776e;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.75;
 }
 
@@ -271,7 +271,7 @@ button {
   gap: 12px;
   margin-top: 22px;
   color: #78827c;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .hero-proof strong {
@@ -292,7 +292,7 @@ button {
   color: #fff;
   border: 2px solid #f3f7f2;
   border-radius: 50%;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   place-items: center;
 }
@@ -347,7 +347,7 @@ button {
   background: transparent;
   border: 0;
   outline: 0;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .search-field input::placeholder {
@@ -371,7 +371,7 @@ button {
   gap: 8px;
   margin-top: 13px;
   color: #829087;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .popular-searches button {
@@ -381,7 +381,7 @@ button {
   border: 1px solid #e0e9e1;
   border-radius: 20px;
   cursor: pointer;
-  font-size: 10px;
+  font-size: 12px;
   transition: background 150ms ease, border-color 150ms ease;
 }
 
@@ -479,14 +479,14 @@ button {
   color: #fff;
   background: #28744f;
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 750;
   place-items: center;
 }
 
 .illustration-save {
   color: #8ca395;
-  font-size: 20px;
+  font-size: 22px;
 }
 
 .illustration-line {
@@ -506,7 +506,7 @@ button {
   color: #427452;
   background: #edf6ed;
   border-radius: 5px;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
 }
 
@@ -515,7 +515,7 @@ button {
   top: 18px;
   left: 25px;
   color: #d38f60;
-  font-size: 32px;
+  font-size: 34px;
 }
 
 .illustration-plant {
@@ -571,13 +571,13 @@ button {
 
 .marketplace-stat strong {
   color: #246b45;
-  font-size: 22px;
+  font-size: 24px;
   letter-spacing: -0.7px;
 }
 
 .marketplace-stat span {
   color: #78847c;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .discover-companies {
@@ -587,7 +587,7 @@ button {
 
 .company-discovery-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 11px;
 }
 
@@ -635,14 +635,14 @@ button {
 .company-discovery-card strong {
   overflow: hidden;
   color: #34473a;
-  font-size: 11px;
+  font-size: 13px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .company-discovery-card small {
   color: #87928a;
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .company-discovery-card .verified-badge {
@@ -665,7 +665,7 @@ button {
 
 .related-job a {
   color: #30463a;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -678,7 +678,7 @@ button {
   display: block;
   margin: 5px 0 0;
   color: #7d8981;
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .company-profile-hero {
@@ -704,7 +704,7 @@ button {
   height: 62px;
   border: 1px solid #dceade;
   border-radius: 14px;
-  font-size: 25px;
+  font-size: 27px;
 }
 
 .company-profile-hero .section-kicker {
@@ -714,7 +714,7 @@ button {
 .company-profile-hero h1 {
   margin: 0;
   color: #23372b;
-  font-size: clamp(24px, 3vw, 34px);
+  font-size: clamp(26px, 3vw, 36px);
   letter-spacing: -1px;
 }
 
@@ -722,7 +722,7 @@ button {
   max-width: 640px;
   margin: 9px 0;
   color: #78847c;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.7;
 }
 
@@ -741,12 +741,12 @@ button {
 
 .company-profile-stats strong {
   color: #276b47;
-  font-size: 22px;
+  font-size: 24px;
 }
 
 .company-profile-stats span {
   color: #78847c;
-  font-size: 9px;
+  font-size: 11px;
   white-space: nowrap;
 }
 
@@ -769,7 +769,7 @@ button {
   display: grid;
   gap: 6px;
   color: #66756b;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 650;
 }
 
@@ -781,7 +781,7 @@ button {
   background: #fff;
   border: 1px solid #dfe7e0;
   border-radius: 6px;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .applicant-filter-empty {
@@ -791,7 +791,7 @@ button {
   background: #f8faf8;
   border: 1px dashed #e1e9e2;
   border-radius: 7px;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .application-overview {
@@ -812,42 +812,42 @@ button {
 
 .application-overview strong {
   color: #276b47;
-  font-size: 21px;
+  font-size: 23px;
 }
 
 .application-overview span {
   color: #78847c;
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .trusted-pathao {
-  font-size: 21px;
+  font-size: 23px;
   font-weight: 800;
   letter-spacing: -1px;
 }
 
 .trusted-bkash {
   color: #8d6472;
-  font-size: 19px;
+  font-size: 21px;
   font-weight: 800;
   letter-spacing: -1px;
 }
 
 .trusted-daraz {
   color: #7184a1;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 750;
   letter-spacing: -1px;
 }
 
 .trusted-brac {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 800;
   letter-spacing: 1px;
 }
 
 .trusted-shopup {
-  font-size: 19px;
+  font-size: 21px;
   font-weight: 750;
   letter-spacing: -1px;
 }
@@ -879,7 +879,7 @@ button {
 .section-kicker {
   margin: 0 0 10px;
   color: #629176;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 1.2px;
 }
 
@@ -887,7 +887,7 @@ button {
 .career-banner h2 {
   margin: 0;
   color: #223229;
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 650;
   letter-spacing: -1.15px;
 }
@@ -896,7 +896,7 @@ button {
   max-width: 300px;
   margin: 0 0 3px;
   color: #78847c;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.65;
 }
 
@@ -956,12 +956,12 @@ button {
 
 .location-card strong {
   color: #34473a;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .location-card small {
   color: #87928a;
-  font-size: 9px;
+  font-size: 13px;
   line-height: 1.4;
 }
 
@@ -1021,13 +1021,13 @@ button {
 
 .category-card-content strong {
   color: #35443b;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
 }
 
 .category-card-content small {
   color: #89938d;
-  font-size: 10px;
+  font-size: 13px;
 }
 
 .category-arrow {
@@ -1055,13 +1055,13 @@ button {
 }
 
 .jobs-heading h2 {
-  font-size: 27px;
+  font-size: 29px;
 }
 
 .jobs-subtitle {
   margin: 8px 0 0;
   color: #879189;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .text-link {
@@ -1074,7 +1074,7 @@ button {
   background: transparent;
   border: 0;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -1084,11 +1084,12 @@ button {
 
 .job-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 13px;
 }
 
 .job-card {
+  position: relative;
   min-width: 0;
   padding: 19px 18px 15px;
   background: #fff;
@@ -1103,20 +1104,50 @@ button {
   transform: translateY(-2px);
 }
 
+.job-card-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.job-card-link::after {
+  position: absolute;
+  z-index: 1;
+  border-radius: inherit;
+  content: "";
+  inset: 0;
+}
+
+.job-card-link:focus-visible {
+  outline: none;
+}
+
+.job-card-link:focus-visible::after {
+  outline: 3px solid #76a783;
+  outline-offset: 3px;
+}
+
 .job-card-top {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
+  gap: 12px;
   margin-bottom: 13px;
+}
+
+.job-card-top > div {
+  min-width: 0;
+  flex: 1;
+  padding-right: 35px;
 }
 
 .company-logo {
   display: grid;
+  flex: 0 0 43px;
   width: 43px;
   height: 43px;
   color: #fff;
   border-radius: 10px;
-  font-size: 19px;
+  font-size: 21px;
   font-weight: 750;
   text-transform: uppercase;
   place-items: center;
@@ -1133,6 +1164,7 @@ button {
 
 .save-button {
   display: inline-flex;
+  flex: 0 0 33px;
   align-items: center;
   justify-content: center;
   width: 33px;
@@ -1144,6 +1176,13 @@ button {
   border-radius: 7px;
   cursor: pointer;
   transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.job-card > .save-button {
+  position: absolute;
+  z-index: 2;
+  top: 19px;
+  right: 18px;
 }
 
 .save-button:hover,
@@ -1163,7 +1202,7 @@ button {
   align-items: center;
   gap: 5px;
   color: #748078;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -1174,21 +1213,21 @@ button {
   color: #fff;
   background: #6fa981;
   border-radius: 50%;
-  font-size: 8px;
+  font-size: 10px;
   place-items: center;
 }
 
 .job-posted {
   margin-left: auto;
   color: #9aa39d;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 400;
 }
 
 .job-card h3 {
-  margin: 8px 0 12px;
+  margin: 8px 0 10px;
   color: #293a30;
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 700;
   letter-spacing: -0.25px;
 }
@@ -1198,7 +1237,7 @@ button {
   flex-wrap: wrap;
   gap: 13px;
   color: #7d8981;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .job-meta span,
@@ -1217,8 +1256,6 @@ button {
 .job-card-bottom {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
   padding-top: 14px;
   margin-top: 15px;
   border-top: 1px solid #eff2ef;
@@ -1226,31 +1263,14 @@ button {
 
 .salary {
   color: #2f6645;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 750;
 }
 
 .salary small {
   color: #9aa39d;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 400;
-}
-
-.view-job {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 0 5px 5px;
-  color: #387c52;
-  background: transparent;
-  border: 0;
-  cursor: pointer;
-  font-size: 10px;
-  font-weight: 700;
-}
-
-.view-job:hover {
-  color: #174f31;
 }
 
 .jobs-more {
@@ -1261,7 +1281,7 @@ button {
 
 .jobs-more .button {
   min-height: 41px;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .empty-state {
@@ -1289,13 +1309,13 @@ button {
 
 .empty-state h3 {
   margin: 14px 0 7px;
-  font-size: 17px;
+  font-size: 19px;
 }
 
 .empty-state p {
   margin: 0 0 18px;
   color: #78847c;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .empty-state .button {
@@ -1340,13 +1360,13 @@ button {
 }
 
 .career-banner h2 {
-  font-size: 23px;
+  font-size: 25px;
 }
 
 .career-banner-copy > p:last-child {
   margin: 8px 0 0;
   color: #81796d;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .career-banner .button {
@@ -1354,7 +1374,7 @@ button {
   z-index: 1;
   flex-shrink: 0;
   min-height: 43px;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .career-banner-decoration {
@@ -1362,7 +1382,7 @@ button {
   right: 22px;
   bottom: -30px;
   color: rgba(208, 173, 129, 0.17);
-  font-size: 145px;
+  font-size: 147px;
 }
 
 .cta-section {
@@ -1394,7 +1414,7 @@ button {
 .cta-label {
   position: relative;
   z-index: 1;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 750;
   letter-spacing: 1.2px;
   opacity: 0.76;
@@ -1404,7 +1424,7 @@ button {
   position: relative;
   z-index: 1;
   margin: 13px 0 8px;
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 650;
   letter-spacing: -0.8px;
   line-height: 1.22;
@@ -1414,7 +1434,7 @@ button {
   position: relative;
   z-index: 1;
   margin: 0 0 16px;
-  font-size: 11px;
+  font-size: 13px;
   opacity: 0.78;
 }
 
@@ -1423,7 +1443,7 @@ button {
   z-index: 1;
   min-height: 39px;
   padding: 0 14px;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .button-light {
@@ -1480,7 +1500,7 @@ button {
 }
 
 .footer-brand {
-  font-size: 20px;
+  font-size: 22px;
 }
 
 .footer-brand .brand-mark {
@@ -1492,7 +1512,7 @@ button {
 .footer-top > div:first-child > p {
   margin: 12px 0 0;
   color: #808b83;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.7;
 }
 
@@ -1512,12 +1532,12 @@ button {
 .footer-links strong {
   margin-bottom: 2px;
   color: #3a4c40;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .footer-links a {
   color: #7c8880;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .footer-links a:hover {
@@ -1530,7 +1550,7 @@ button {
   padding: 14px 0 17px;
   color: #909a93;
   border-top: 1px solid #e8ede8;
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .modal-backdrop {
@@ -1566,7 +1586,7 @@ button {
   border: 0;
   border-radius: 50%;
   cursor: pointer;
-  font-size: 22px;
+  font-size: 24px;
   line-height: 1;
   place-items: center;
 }
@@ -1580,14 +1600,14 @@ button {
   align-items: center;
   gap: 6px;
   color: #748078;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 650;
 }
 
 .job-dialog h2 {
   margin: 7px 0 12px;
   color: #24372b;
-  font-size: 23px;
+  font-size: 25px;
   letter-spacing: -0.7px;
 }
 
@@ -1596,7 +1616,7 @@ button {
   flex-wrap: wrap;
   gap: 15px;
   color: #7b8980;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .dialog-meta svg {
@@ -1610,20 +1630,20 @@ button {
   color: #2e7148;
   border-top: 1px solid #edf1ed;
   border-bottom: 1px solid #edf1ed;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 750;
 }
 
 .dialog-salary span {
   color: #89948c;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 400;
 }
 
 .dialog-description {
   margin: 17px 0;
   color: #68756d;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.75;
 }
 
@@ -1638,7 +1658,7 @@ button {
   color: #56725f;
   background: #f1f6f1;
   border-radius: 5px;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .dialog-footer {
@@ -1655,12 +1675,12 @@ button {
   height: 43px;
   gap: 8px;
   padding: 0 12px;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .dialog-footer .button {
   min-height: 43px;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 @media (max-width: 980px) {
@@ -1714,7 +1734,7 @@ button {
   }
 
   .brand {
-    font-size: 21px;
+    font-size: 23px;
   }
 
   .main-nav {
@@ -1739,13 +1759,13 @@ button {
   }
 
   .hero h1 {
-    font-size: clamp(39px, 9vw, 52px);
+    font-size: clamp(41px, 9vw, 54px);
     letter-spacing: -2.2px;
   }
 
   .hero-description {
     max-width: 460px;
-    font-size: 13px;
+    font-size: 15px;
   }
 
   .hero-illustration {
@@ -1801,7 +1821,7 @@ button {
 
   .search-field input,
   .search-field select {
-    font-size: 11px;
+    font-size: 13px;
   }
 
   .search-button {
@@ -1831,9 +1851,9 @@ button {
 
   .trusted-pathao,
   .trusted-daraz,
-  .trusted-shopup { font-size: 16px; }
-  .trusted-bkash { font-size: 15px; }
-  .trusted-brac { font-size: 10px; }
+  .trusted-shopup { font-size: 18px; }
+  .trusted-bkash { font-size: 17px; }
+  .trusted-brac { font-size: 12px; }
 
   .section {
     padding-right: 20px;
@@ -1853,7 +1873,7 @@ button {
 
   .section-heading h2,
   .career-banner h2 {
-    font-size: 25px;
+    font-size: 27px;
   }
 
   .section-description {
@@ -1882,11 +1902,11 @@ button {
   }
 
   .category-card-content strong {
-    font-size: 10px;
+    font-size: 12px;
   }
 
   .category-card-content small {
-    font-size: 9px;
+    font-size: 11px;
   }
 
   .category-arrow {
@@ -1904,7 +1924,7 @@ button {
   }
 
   .jobs-heading h2 {
-    font-size: 24px;
+    font-size: 26px;
   }
 
   .job-grid {
@@ -1934,7 +1954,7 @@ button {
   }
 
   .career-banner h2 {
-    font-size: 20px;
+    font-size: 22px;
   }
 
   .career-banner .button {
@@ -1944,7 +1964,7 @@ button {
   .career-banner-decoration {
     right: 0;
     bottom: -38px;
-    font-size: 120px;
+    font-size: 122px;
   }
 
   .cta-section {
@@ -1959,7 +1979,7 @@ button {
   }
 
   .cta-card h2 {
-    font-size: 22px;
+    font-size: 24px;
   }
 
   .site-footer {
@@ -1981,16 +2001,16 @@ button {
   }
 
   .footer-links strong {
-    font-size: 9px;
+    font-size: 11px;
   }
 
   .footer-links a {
-    font-size: 9px;
+    font-size: 11px;
   }
 
   .footer-bottom {
     gap: 12px;
-    font-size: 8px;
+    font-size: 10px;
   }
 
   .job-dialog {
@@ -1999,7 +2019,7 @@ button {
 
   .job-dialog h2 {
     max-width: 90%;
-    font-size: 20px;
+    font-size: 22px;
   }
 }
 
@@ -2009,13 +2029,13 @@ button {
   }
 
   .login-link {
-    font-size: 11px;
+    font-size: 13px;
   }
 
   .button-small {
     min-height: 36px;
     padding: 0 11px;
-    font-size: 10px;
+    font-size: 12px;
   }
 
   .category-card {
@@ -2029,11 +2049,11 @@ button {
   }
 
   .category-card-content strong {
-    font-size: 9px;
+    font-size: 11px;
   }
 
   .category-card-content small {
-    font-size: 8px;
+    font-size: 10px;
   }
 }
 
@@ -2049,7 +2069,7 @@ button {
 }
 
 .brand-mark > span {
-  font-size: 17px;
+  font-size: 19px;
   font-weight: 800;
 }
 
@@ -2072,7 +2092,7 @@ button {
   background: #f2f5ea;
   border: 1px solid #e8ecdc;
   border-radius: 6px;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.5;
 }
 
@@ -2084,7 +2104,7 @@ button {
   background: #fff5d9;
   border: 1px solid #f0dfa9;
   border-radius: 999px;
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.55px;
   line-height: 1.2;
@@ -2099,7 +2119,7 @@ button {
   background: #fff8e8;
   border: 1px solid #f0e0b7;
   border-radius: 8px;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.65;
 }
 
@@ -2123,13 +2143,13 @@ button {
   background: transparent;
   border: 0;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .logout-error {
   max-width: 190px;
   color: #a24137;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .auth-page {
@@ -2154,14 +2174,14 @@ button {
 .auth-card h1 {
   margin: 0;
   color: #23372b;
-  font-size: 29px;
+  font-size: 31px;
   letter-spacing: -1.1px;
 }
 
 .auth-intro {
   margin: 9px 0 22px;
   color: #748178;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.6;
 }
 
@@ -2183,7 +2203,7 @@ button {
   border: 0;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 650;
 }
 
@@ -2207,7 +2227,7 @@ button {
   flex-direction: column;
   gap: 7px;
   color: #49584e;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 650;
 }
 
@@ -2228,7 +2248,7 @@ button {
   border: 1px solid #dfe7e0;
   border-radius: 7px;
   outline: none;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 400;
   transition: border-color 150ms ease, box-shadow 150ms ease;
 }
@@ -2266,7 +2286,7 @@ button {
   margin: 20px 0 0;
   color: #7c8880;
   text-align: center;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .auth-switch a,
@@ -2280,7 +2300,7 @@ button {
   padding: 10px 12px;
   margin: 0 0 14px;
   border-radius: 6px;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.5;
 }
 
@@ -2314,7 +2334,7 @@ button {
 .dashboard-heading h1 {
   margin: 0;
   color: #23372b;
-  font-size: clamp(29px, 4vw, 38px);
+  font-size: clamp(31px, 4vw, 40px);
   letter-spacing: -1.3px;
 }
 
@@ -2322,7 +2342,7 @@ button {
 .dashboard-heading > p:last-child {
   margin: 8px 0 0;
   color: #78847c;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .filter-panel {
@@ -2358,14 +2378,14 @@ button {
 
 .listing-heading h2 {
   margin: 0;
-  font-size: 19px;
+  font-size: 21px;
   letter-spacing: -0.35px;
 }
 
 .listing-heading p {
   margin: 5px 0 0;
   color: #89938d;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .search-results {
@@ -2397,7 +2417,7 @@ button {
   color: #34754c;
   background: #eaf4eb;
   border-radius: 10px;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 750;
   place-items: center;
 }
@@ -2412,7 +2432,7 @@ button {
   align-items: center;
   gap: 6px;
   color: #748078;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 650;
 }
 
@@ -2424,7 +2444,7 @@ button {
 .result-body h3 {
   margin: 7px 0 9px;
   color: #293a30;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .result-body h3 a:hover,
@@ -2443,7 +2463,7 @@ button {
   color: #617067;
   background: #f3f6f3;
   border-radius: 5px;
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .result-description {
@@ -2452,7 +2472,7 @@ button {
   margin: 10px 0;
   overflow: hidden;
   color: #758178;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.6;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -2460,12 +2480,12 @@ button {
 
 .result-salary {
   color: #316b47;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .result-salary small {
   color: #8c978f;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 400;
 }
 
@@ -2480,7 +2500,7 @@ button {
 .result-actions .button {
   min-height: 36px;
   padding: 0 12px;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .save-control {
@@ -2499,7 +2519,7 @@ button {
   border: 1px solid #efc5c0;
   border-radius: 5px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .pagination {
@@ -2509,7 +2529,7 @@ button {
   gap: 17px;
   margin-top: 25px;
   color: #78847c;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .pagination .button {
@@ -2527,7 +2547,7 @@ button {
   display: inline-block;
   margin: 0 0 15px;
   color: #4d795b;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 650;
 }
 
@@ -2549,19 +2569,19 @@ button {
   width: 52px;
   height: 52px;
   flex-basis: 52px;
-  font-size: 22px;
+  font-size: 24px;
 }
 
 .detail-company-row p {
   margin: 5px 0 0;
   color: #87928a;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .detail-card > h1 {
   margin: 22px 0 12px;
   color: #25372c;
-  font-size: 27px;
+  font-size: 29px;
   letter-spacing: -0.9px;
 }
 
@@ -2570,13 +2590,13 @@ button {
   margin: 16px 0 0;
   color: #2e7148;
   border-bottom: 1px solid #edf1ed;
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 750;
 }
 
 .detail-salary small {
   color: #89948c;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 400;
 }
 
@@ -2588,14 +2608,14 @@ button {
 .detail-action-card h2 {
   margin: 0 0 9px;
   color: #304338;
-  font-size: 15px;
+  font-size: 17px;
 }
 
 .detail-section p,
 .detail-action-card > p {
   margin: 0;
   color: #6f7c73;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.8;
   white-space: pre-line;
 }
@@ -2636,7 +2656,7 @@ button {
 }
 
 .company-about .text-link {
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .apply-control {
@@ -2656,7 +2676,7 @@ button {
 .application-form label span,
 .label-hint {
   color: #8a968e;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 400;
 }
 
@@ -2668,7 +2688,7 @@ button {
 .application-actions .button {
   min-height: 38px;
   padding: 0 10px;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .dashboard-shell {
@@ -2680,7 +2700,7 @@ button {
 }
 
 .dashboard-heading h1 {
-  font-size: 32px;
+  font-size: 34px;
 }
 
 .dashboard-columns {
@@ -2736,20 +2756,20 @@ button {
 
 .hiring-focus strong {
   color: #35483a;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .hiring-focus p {
   margin: 0;
   color: #748078;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.5;
 }
 
 .hiring-focus a {
   flex: 0 0 auto;
   color: #34734d;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -2758,7 +2778,7 @@ button {
 .dashboard-tip h2 {
   margin: 0;
   color: #293b30;
-  font-size: 17px;
+  font-size: 19px;
   letter-spacing: -0.35px;
 }
 
@@ -2768,7 +2788,7 @@ button {
   color: #6e7b72;
   background: #f3f6f3;
   border-radius: 20px;
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .count-badge {
@@ -2821,7 +2841,7 @@ button {
 
 .resume-entry-heading h3 {
   margin: 0;
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .resume-add-actions {
@@ -2846,7 +2866,7 @@ button {
 
 .resume-paper header h1 {
   margin: 0;
-  font-size: 28px;
+  font-size: 30px;
 }
 
 .resume-paper header p {
@@ -2867,13 +2887,13 @@ button {
   margin: 0 0 8px;
   color: #397a53;
   border-bottom: 1px solid #e6ece7;
-  font-size: 12px;
+  font-size: 14px;
   text-transform: uppercase;
 }
 
 .resume-paper section p {
   margin: 5px 0;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.55;
   white-space: pre-wrap;
 }
@@ -2882,7 +2902,7 @@ button {
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .resume-empty {
@@ -2929,7 +2949,7 @@ button {
   background: #e9f4ed;
   border: 1px solid #c9e4d2;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   vertical-align: middle;
 }
@@ -2943,7 +2963,7 @@ button {
   background: #fff4d4;
   border: 1px solid #efd68f;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 750;
   vertical-align: middle;
 }
@@ -2975,7 +2995,7 @@ button {
   gap: 6px;
   margin-top: 12px;
   color: #69766f;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -3060,14 +3080,14 @@ button {
 
 .activity-title {
   color: #30463a;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
 }
 
 .activity-row p {
   margin: 5px 0 0;
   color: #839087;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .activity-status {
@@ -3078,7 +3098,7 @@ button {
 
 .activity-status small {
   color: #8e9891;
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .status-pill {
@@ -3088,7 +3108,7 @@ button {
   color: #62736a;
   background: #f2f5f2;
   border-radius: 20px;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 650;
 }
 
@@ -3118,7 +3138,7 @@ button {
 .dashboard-empty {
   padding: 16px 0 3px;
   color: #7c8880;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .dashboard-empty p {
@@ -3126,7 +3146,7 @@ button {
 }
 
 .dashboard-empty .text-link {
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .subtle-button {
@@ -3136,7 +3156,7 @@ button {
   border: 1px solid #e5ebe6;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .subtle-button:hover {
@@ -3146,7 +3166,7 @@ button {
 
 .cv-card > p:not(.section-kicker) {
   color: #758178;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.65;
 }
 
@@ -3171,7 +3191,7 @@ button {
 .cv-download-link {
   overflow-wrap: anywhere;
   color: #34734d;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 650;
 }
 
@@ -3189,12 +3209,12 @@ button {
   display: grid;
   gap: 7px;
   color: #55645a;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .upload-field input {
   width: 100%;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .dashboard-tip {
@@ -3211,7 +3231,7 @@ button {
 .dashboard-tip p:last-child {
   margin: 8px 0 0;
   color: #797b6b;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.6;
 }
 
@@ -3233,12 +3253,12 @@ button {
 
 .employer-stats strong {
   color: #276b47;
-  font-size: 22px;
+  font-size: 24px;
 }
 
 .employer-stats span {
   color: #78847c;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .employer-job-card {
@@ -3256,7 +3276,7 @@ button {
 
 .employer-job-heading h3 {
   margin: 0;
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .employer-job-heading h3 a {
@@ -3266,7 +3286,7 @@ button {
 .employer-job-heading p {
   margin: 5px 0 0;
   color: #839087;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .applicant-list-heading {
@@ -3277,7 +3297,7 @@ button {
 
 .applicant-list-heading strong {
   color: #67756c;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .applicant-list {
@@ -3301,7 +3321,7 @@ button {
 
 .applicant-row > div > strong {
   color: #34473a;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .applicant-row p,
@@ -3309,7 +3329,7 @@ button {
   display: block;
   margin: 5px 0 0;
   color: #849087;
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .applicant-row blockquote {
@@ -3317,7 +3337,7 @@ button {
   margin: 8px 0 0;
   color: #6e7c73;
   border-left: 2px solid #c5d9c7;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.5;
   white-space: pre-line;
 }
@@ -3333,7 +3353,7 @@ button {
   align-content: start;
   gap: 5px;
   color: #7a867e;
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .status-select-label select {
@@ -3344,7 +3364,7 @@ button {
   background: #fff;
   border: 1px solid #dfe7e0;
   border-radius: 5px;
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .company-form {
@@ -3352,6 +3372,10 @@ button {
 }
 
 @media (max-width: 800px) {
+  .company-discovery-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .filter-panel {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -3436,7 +3460,7 @@ button {
   }
 
   .result-description {
-    font-size: 10px;
+    font-size: 12px;
   }
 
   .detail-card,
@@ -3446,7 +3470,7 @@ button {
   }
 
   .detail-card > h1 {
-    font-size: 23px;
+    font-size: 25px;
   }
 
   .detail-sidebar {
@@ -3484,7 +3508,7 @@ button {
   }
 
   .employer-stats strong {
-    font-size: 18px;
+    font-size: 20px;
   }
 
   .applicant-row {
@@ -3549,7 +3573,7 @@ button {
     max-width: 410px;
     margin: 0;
     color: #20352a;
-    font-size: clamp(28px, 3.4vw, 39px);
+    font-size: clamp(30px, 3.4vw, 41px);
     font-weight: 650;
     letter-spacing: -1.7px;
     line-height: 1.14;
@@ -3559,7 +3583,7 @@ button {
     max-width: 390px;
     margin: 15px 0 22px;
     color: #718078;
-    font-size: 13px;
+    font-size: 15px;
     line-height: 1.75;
   }
 
@@ -3600,7 +3624,7 @@ button {
     background: #e7f1e7;
     border: 1px solid #d8e7d9;
     border-radius: 12px;
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 750;
     place-items: center;
   }
@@ -3608,7 +3632,7 @@ button {
   .journey-steps h3 {
     margin: 1px 0 5px;
     color: #2b4133;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
     letter-spacing: -0.2px;
   }
@@ -3617,7 +3641,7 @@ button {
     max-width: 440px;
     margin: 0;
     color: #76837a;
-    font-size: 11px;
+    font-size: 13px;
     line-height: 1.65;
   }
 
@@ -3632,12 +3656,12 @@ button {
 
     .journey-intro h2 {
       max-width: 340px;
-      font-size: 29px;
+      font-size: 31px;
       letter-spacing: -1.2px;
     }
 
     .journey-intro > p:not(.section-kicker) {
-      font-size: 12px;
+      font-size: 14px;
     }
 
     .journey-steps li {
@@ -3672,7 +3696,7 @@ button {
   padding: 0 12px;
   color: #5f7065;
   border-radius: 7px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 650;
   transition: color 150ms ease, background 150ms ease;
 }
@@ -3715,7 +3739,7 @@ button {
   background: #fff;
   border: 1px solid #dfeadd;
   border-radius: 12px;
-  font-size: 17px;
+  font-size: 19px;
   place-items: center;
 }
 
@@ -3728,7 +3752,7 @@ button {
 .hiring-pipeline h2 {
   margin: 0;
   color: #293b30;
-  font-size: 15px;
+  font-size: 17px;
   letter-spacing: -0.3px;
 }
 
@@ -3736,7 +3760,7 @@ button {
   max-width: 540px;
   margin: 6px 0 0;
   color: #748178;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.55;
 }
 
@@ -3768,13 +3792,13 @@ button {
 
 .readiness-progress > strong {
   color: #2c7049;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .readiness-progress > a {
   grid-column: 1 / -1;
   color: #33764e;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
 }
 
@@ -3806,7 +3830,7 @@ button {
   color: #9a6a31;
   background: #fbf3e8;
   border-radius: 10px;
-  font-size: 18px;
+  font-size: 20px;
   place-items: center;
 }
 
@@ -3830,20 +3854,20 @@ button {
 
 .upcoming-interview strong {
   color: #34473a;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .upcoming-interview p,
 .upcoming-interview-location {
   margin: 5px 0 0;
   color: #7d8981;
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .upcoming-interview .button {
   min-height: 34px;
   padding: 0 10px;
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .application-filters {
@@ -3864,7 +3888,7 @@ button {
   border: 1px solid transparent;
   border-radius: 999px;
   cursor: pointer;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 650;
   transition: color 150ms ease, background 150ms ease, border-color 150ms ease;
 }
@@ -3907,7 +3931,7 @@ button {
 .hiring-pipeline-heading > a {
   flex: 0 0 auto;
   color: #34734d;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
 }
 
@@ -3943,7 +3967,7 @@ button.hiring-pipeline-stage[aria-pressed="true"] {
 .hiring-pipeline-stage-label {
   overflow: hidden;
   color: #77837b;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 650;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -3951,7 +3975,7 @@ button.hiring-pipeline-stage[aria-pressed="true"] {
 
 .hiring-pipeline-stage > strong {
   color: #286b47;
-  font-size: 19px;
+  font-size: 21px;
   letter-spacing: -0.5px;
 }
 
@@ -3961,7 +3985,7 @@ button.hiring-pipeline-stage[aria-pressed="true"] {
 
 .hiring-pipeline-stage-note {
   color: #89948c;
-  font-size: 8px;
+  font-size: 10px;
 }
 
 @media (max-width: 800px) {
@@ -3988,7 +4012,7 @@ button.hiring-pipeline-stage[aria-pressed="true"] {
   .dashboard-shortcuts a {
     min-height: 32px;
     padding: 0 8px;
-    font-size: 9px;
+    font-size: 11px;
   }
 
   .dashboard-shortcuts a:last-child {
@@ -4013,7 +4037,7 @@ button.hiring-pipeline-stage[aria-pressed="true"] {
   .profile-readiness h2,
   .upcoming-interviews h2,
   .hiring-pipeline h2 {
-    font-size: 13px;
+    font-size: 15px;
   }
 
   .upcoming-interviews {

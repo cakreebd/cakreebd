@@ -391,28 +391,31 @@ export default function HomeClient({
           <div className="job-grid">
             {filteredJobs.map((job) => (
               <article className={`job-card${job.featured ? " job-card-featured" : ""}`} key={job.id}>
-                <div className="job-card-top">
-                  <span className={`company-logo company-logo-${job.logoTone}`}>{job.logo}</span>
-                  <button
-                    aria-label={savedJobs.includes(job.id) ? `Remove ${job.title} from saved jobs` : `Save ${job.title}`}
-                    aria-pressed={savedJobs.includes(job.id)}
-                    className={`save-button${savedJobs.includes(job.id) ? " save-button-active" : ""}`}
-                    onClick={() => toggleSavedJob(job.id)}
-                    type="button"
-                  >
-                    <Icon name="bookmark" />
-                  </button>
-                </div>
-                <div className="job-company">{job.company}{job.demo && <DemoBadge />}{job.featured && <FeaturedBadge />}{job.companyVerified && <VerifiedBadge />}<span className="job-posted">{job.posted}</span></div>
-                <h3>{job.title}</h3>
-                <div className="job-meta">
-                  <span><Icon name="pin" />{job.location}</span>
-                  <span><Icon name="briefcase" />{job.employment}</span>
-                </div>
-                <div className="job-card-bottom">
-                  <div className="salary">{job.salary}<small> / month</small></div>
-                  <Link className="view-job" href={`/jobs/${job.id}`}>View job <Icon className="h-4 w-4" name="arrow" /></Link>
-                </div>
+                <Link aria-label={`View ${job.title} at ${job.company}`} className="job-card-link" href={`/jobs/${job.id}`}>
+                  <div className="job-card-top">
+                    <span className={`company-logo company-logo-${job.logoTone}`}>{job.logo}</span>
+                    <div>
+                      <div className="job-company">{job.company}{job.demo && <DemoBadge />}{job.featured && <FeaturedBadge />}{job.companyVerified && <VerifiedBadge />}</div>
+                      <h3>{job.title}</h3>
+                      <div className="job-meta">
+                        <span><Icon name="pin" />{job.location}</span>
+                        <span><Icon name="briefcase" />{job.employment}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="job-card-bottom">
+                    <div className="salary">{job.salary}<small> / month</small></div>
+                  </div>
+                </Link>
+                <button
+                  aria-label={savedJobs.includes(job.id) ? `Remove ${job.title} from saved jobs` : `Save ${job.title}`}
+                  aria-pressed={savedJobs.includes(job.id)}
+                  className={`save-button${savedJobs.includes(job.id) ? " save-button-active" : ""}`}
+                  onClick={() => toggleSavedJob(job.id)}
+                  type="button"
+                >
+                  <Icon name="bookmark" />
+                </button>
               </article>
             ))}
           </div>

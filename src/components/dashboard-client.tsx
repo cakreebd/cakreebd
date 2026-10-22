@@ -562,6 +562,7 @@ function EmployerDashboard({
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const [salaryNegotiable, setSalaryNegotiable] = useState(false);
   const [companyName, setCompanyName] = useState(profile.companyName ?? "");
   const [companyBio, setCompanyBio] = useState(profile.companyBio ?? "");
   const [website, setWebsite] = useState(profile.website ?? "");
@@ -656,8 +657,9 @@ function EmployerDashboard({
       location: form.get("location"),
       employmentType: form.get("employmentType"),
       workMode: form.get("workMode"),
-      salaryMin: numberOrNull(form.get("salaryMin")),
-      salaryMax: numberOrNull(form.get("salaryMax")),
+      salaryNegotiable: form.get("salaryNegotiable") === "on",
+      salaryMin: form.get("salaryNegotiable") === "on" ? null : numberOrNull(form.get("salaryMin")),
+      salaryMax: form.get("salaryNegotiable") === "on" ? null : numberOrNull(form.get("salaryMax")),
       description: form.get("description"),
       requirements: form.get("requirements"),
       benefits: form.get("benefits") || null,
@@ -676,6 +678,7 @@ function EmployerDashboard({
       }
       setJobs((current) => [{ ...result.job!, applications: [] }, ...current]);
       formElement.reset();
+      setSalaryNegotiable(false);
       setMessage("Your job is live and accepting applications.");
     } catch {
       setError("Could not reach the server. Please try again.");
@@ -892,9 +895,10 @@ function EmployerDashboard({
               <label>Location<input maxLength={100} name="location" placeholder="Dhaka or Remote" required /></label>
               <label>Employment type<select name="employmentType">{["Full-time", "Part-time", "Contract", "Internship", "Temporary"].map((item) => <option key={item}>{item}</option>)}</select></label>
               <label>Work arrangement<select name="workMode">{["On-site", "Hybrid", "Remote"].map((item) => <option key={item}>{item}</option>)}</select></label>
-              <label>Minimum salary (BDT / month)<input min="0" name="salaryMin" placeholder="e.g. 50000" type="number" /></label>
-              <label>Maximum salary (BDT / month)<input min="0" name="salaryMax" placeholder="e.g. 80000" type="number" /></label>
-              <p className="label-hint full-width">Enter monthly amounts in Bangladeshi taka (৳). Leave both blank if the salary is negotiable.</p>
+              <label>Minimum salary (BDT / month)<input disabled={salaryNegotiable} min="0" name="salaryMin" placeholder="e.g. 50000" type="number" /></label>
+              <label>Maximum salary (BDT / month)<input disabled={salaryNegotiable} min="0" name="salaryMax" placeholder="e.g. 80000" type="number" /></label>
+              <label className="full-width"><span>Salary option</span><span className="visibility-option"><input checked={salaryNegotiable} className="visibility-checkbox" name="salaryNegotiable" onChange={(event) => setSalaryNegotiable(event.target.checked)} type="checkbox" /><span>Salary is negotiable</span></span></label>
+              <p className="label-hint full-width">Enter monthly amounts in Bangladeshi taka (৳), or select “Salary is negotiable”.</p>
               <label className="full-width">Role description<textarea minLength={30} name="description" placeholder="Describe the role and what success looks like." required rows={5} /></label>
               <label className="full-width">Requirements<textarea minLength={10} name="requirements" placeholder="What experience and skills are you looking for?" required rows={4} /></label>
               <label className="full-width">Benefits <span className="label-hint">Optional</span><textarea name="benefits" placeholder="Benefits, leave, learning, and other perks." rows={3} /></label>

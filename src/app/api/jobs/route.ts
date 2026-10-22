@@ -18,6 +18,7 @@ const createJobSchema = z.object({
   location: z.string().trim().min(2).max(100),
   employmentType: z.enum(["Full-time", "Part-time", "Contract", "Internship", "Temporary"]),
   workMode: z.enum(["On-site", "Hybrid", "Remote"]),
+  salaryNegotiable: z.boolean().default(false),
   salaryMin: z.number().int().nonnegative().nullable(),
   salaryMax: z.number().int().positive().nullable(),
   description: z.string().trim().min(30).max(10000),
@@ -140,13 +141,14 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return badRequest("Check the required fields, salary range, and description lengths.");
   }
-  if (
+  if (!parsed.data.salaryNegotiable &&
     parsed.data.salaryMin !== null &&
     parsed.data.salaryMax !== null &&
     parsed.data.salaryMin > parsed.data.salaryMax
   ) {
     return badRequest("The minimum salary cannot be higher than the maximum salary.");
   }
+  const { salaryNegotiable, ...jobData } = parsed.data;
 
   const employer = await prisma.user.findUnique({
     where: { id: user.id },
@@ -182,11 +184,13 @@ export async function POST(request: Request) {
     if (activeJobs >= packageDetails.activeJobLimit) return null;
     return transaction.job.create({
       data: {
-        ...parsed.data,
-        tags: JSON.stringify(parsed.data.tags),
+        ...jobData,
+        salaryMin: salaryNegotiable ? null : jobData.salaryMin,
+        salaryMax: salaryNegotiable ? null : jobData.salaryMax,
+        tags: JSON.stringify(jobData.tags),
         employerId: user.id,
         companyName,
-        benefits: parsed.data.benefits || null,
+        benefits: jobData.benefits || null,
         featuredUntil: effectivePlan === "GROWTH" ? plan.expiresAt : null,
       },
     });
