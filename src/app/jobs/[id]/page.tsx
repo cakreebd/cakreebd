@@ -7,6 +7,7 @@ import SiteHeader from "@/components/site-header";
 import VerifiedBadge from "@/components/verified-badge";
 import FeaturedBadge from "@/components/featured-badge";
 import DemoBadge from "@/components/demo-badge";
+import JobViewTracker from "@/components/job-analytics-tracker";
 import { getCurrentUser } from "@/lib/auth";
 import { formatSalary, parseTags, postedLabel } from "@/lib/jobs";
 import { prisma } from "@/lib/prisma";
@@ -97,6 +98,7 @@ async function JobDetailContent({ params }: PageProps) {
   return (
     <>
       <SiteHeader user={user} />
+      {!isDemo && <JobViewTracker jobId={job.id} />}
       <main className="page-shell detail-layout">
         <div className="detail-main">
           <Link className="back-link" href="/jobs">← Back to job search</Link>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { recordJobAnalytics } from "@/components/job-analytics-tracker";
 
 export default function ApplyButton({
   jobId,
@@ -51,7 +52,7 @@ export default function ApplyButton({
     return <p className="form-success" role="status">You have applied for this role.</p>;
   }
   if (!signedIn) {
-    return <a className="button button-primary" href="/login">Sign in to apply</a>;
+    return <a className="button button-primary" href="/login" onClick={() => { void recordJobAnalytics(jobId, "APPLY_CLICK"); }}>Sign in to apply</a>;
   }
   if (!isJobSeeker) {
     return <p className="form-error">Employer accounts cannot apply for jobs.</p>;
@@ -60,7 +61,7 @@ export default function ApplyButton({
   return (
     <div className="apply-control">
       {!open ? (
-        <button className="button button-primary" onClick={() => setOpen(true)} type="button">Apply for this job</button>
+        <button className="button button-primary" onClick={() => { void recordJobAnalytics(jobId, "APPLY_CLICK"); setOpen(true); }} type="button">Apply for this job</button>
       ) : (
         <div className="application-form">
           <label>

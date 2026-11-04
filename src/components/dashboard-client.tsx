@@ -8,6 +8,7 @@ import VerifiedBadge from "@/components/verified-badge";
 import FeaturedBadge from "@/components/featured-badge";
 import DemoBadge from "@/components/demo-badge";
 import DashboardSidebar from "@/components/dashboard-sidebar";
+import type { EmployerJobAnalytics } from "@/lib/employer-analytics";
 
 type BasicJob = {
   id: number;
@@ -161,6 +162,7 @@ type Props =
       profile: EmployerProfile;
       jobs: EmployerJob[];
       plan: "FREE" | "STARTER" | "GROWTH";
+      analytics: EmployerJobAnalytics[] | null;
       paymentConfigured: boolean;
       planExpiresAt: string | null;
       notifications: DashboardNotification[];
@@ -170,7 +172,7 @@ export default function DashboardClient(props: Props) {
   if (props.mode === "JOB_SEEKER") {
     return <CandidateDashboard section={props.section} profile={props.profile} recommendedJobs={props.recommendedJobs} initialApplications={props.applications} initialSavedJobs={props.savedJobs} notifications={props.notifications} />;
   }
-  return <EmployerDashboard section={props.section} profile={props.profile} initialJobs={props.jobs} plan={props.plan} paymentConfigured={props.paymentConfigured} planExpiresAt={props.planExpiresAt} notifications={props.notifications} />;
+  return <EmployerDashboard section={props.section} profile={props.profile} initialJobs={props.jobs} plan={props.plan} analytics={props.analytics} paymentConfigured={props.paymentConfigured} planExpiresAt={props.planExpiresAt} notifications={props.notifications} />;
 }
 
 function CandidateDashboard({
@@ -616,6 +618,7 @@ function EmployerDashboard({
   profile,
   initialJobs,
   plan: initialPlan,
+  analytics,
   paymentConfigured,
   planExpiresAt,
   notifications,
@@ -624,6 +627,7 @@ function EmployerDashboard({
   profile: EmployerProfile;
   initialJobs: EmployerJob[];
   plan: EmployerPlanKey;
+  analytics: EmployerJobAnalytics[] | null;
   paymentConfigured: boolean;
   planExpiresAt: string | null;
   notifications: DashboardNotification[];
@@ -932,13 +936,14 @@ function EmployerDashboard({
     "post-job": "Post a job",
     jobs: "Job postings",
     applicants: "Applicants",
+    analytics: "Job analytics",
     candidates: "Find candidates",
     company: "Company profile",
     verification: "Company verification",
     plan: "Hiring package",
     notifications: "Notifications",
   };
-  const singleColumnSections = ["overview", "post-job", "jobs", "applicants", "candidates", "company", "verification", "plan", "notifications"];
+  const singleColumnSections = ["overview", "post-job", "jobs", "applicants", "analytics", "candidates", "company", "verification", "plan", "notifications"];
 
   return (
     <main className="dashboard-shell">
@@ -975,6 +980,14 @@ function EmployerDashboard({
       </>}
       <div className={`dashboard-columns employer-columns${singleColumnSections.includes(section) ? " dashboard-single-column" : ""}`}>
         <div className="dashboard-main-column">
+          {section === "analytics" && (analytics
+            ? <JobAnalyticsPanel analytics={analytics} />
+            : <section className="dashboard-card">
+              <p className="section-kicker">GROWTH FEATURE</p>
+              <h2>Understand what’s working</h2>
+              <p className="plan-feature-copy">See job views, apply clicks, and application conversion for every opening over the last 30 days.</p>
+              <Link className="button button-primary" href="/dashboard/plan">Explore the Growth package</Link>
+            </section>)}
           {section === "post-job" &&
           <section className="dashboard-card" id="employer-post-job">
             <div className="dashboard-card-heading"><div><p className="section-kicker">CREATE AN OPPORTUNITY</p><h2>Post a job</h2></div></div>
@@ -1069,9 +1082,10 @@ function EmployerDashboard({
             <p className="section-kicker">HIRING PACKAGES</p><h2>{EMPLOYER_PLANS[plan].name} package</h2>
             <p>{activeJobCount} of {EMPLOYER_PLANS[plan].activeJobLimit} active job slots used.{planExpiresAt ? ` Expires ${formatDate(planExpiresAt)}.` : ""}</p>
             {EMPLOYER_PLANS[plan].featuredListings && <p className="verification-state"><FeaturedBadge /> Active job listings are highlighted in search until your Growth package expires.</p>}
+            {EMPLOYER_PLANS[plan].analyticsDashboard && <p className="verification-state">Growth also includes a 30-day analytics dashboard for job views, apply clicks, and applications.</p>}
             <div className="dashboard-list">{(Object.keys(EMPLOYER_PLANS) as EmployerPlanKey[]).map((key) => (
               <article className="activity-row" key={key}>
-                <div><strong>{EMPLOYER_PLANS[key].name}</strong><p>{EMPLOYER_PLANS[key].price === 0 ? "Free" : `৳${EMPLOYER_PLANS[key].price.toLocaleString("en-BD")} / month`} · {EMPLOYER_PLANS[key].activeJobLimit} active jobs{EMPLOYER_PLANS[key].featuredListings ? " · featured listing placement" : ""}</p></div>
+                <div><strong>{EMPLOYER_PLANS[key].name}</strong><p>{EMPLOYER_PLANS[key].price === 0 ? "Free" : `৳${EMPLOYER_PLANS[key].price.toLocaleString("en-BD")} / month`} · {EMPLOYER_PLANS[key].activeJobLimit} active jobs{EMPLOYER_PLANS[key].featuredListings ? " · featured listing placement" : ""}{EMPLOYER_PLANS[key].analyticsDashboard ? " · 30-day job analytics" : ""}</p></div>
                 <button className="subtle-button" disabled={plan === key || (key !== "FREE" && !paymentConfigured)} onClick={() => changePlan(key)} type="button">{plan === key ? "Current" : key === "FREE" ? "Downgrade" : paymentConfigured ? "Pay with bKash" : "Configure bKash"}</button>
               </article>
             ))}</div>
@@ -1114,6 +1128,45 @@ function EmployerDashboard({
       </div>
       </div>
     </main>
+  );
+}
+
+function JobAnalyticsPanel({ analytics }: { analytics: EmployerJobAnalytics[] }) {
+  const views = analytics.reduce((total, job) => total + job.views, 0);
+  const applyClicks = analytics.reduce((total, job) => total + job.applyClicks, 0);
+  const applications = analytics.reduce((total, job) => total + job.applications, 0);
+  const applicationRate = views ? `${((applications / views) * 100).toFixed(1)}%` : "0%";
+
+  return (
+    <section aria-labelledby="job-analytics-heading" className="dashboard-card">
+      <div className="dashboard-card-heading">
+        <div><p className="section-kicker">GROWTH ANALYTICS</p><h2 id="job-analytics-heading">Candidate engagement</h2></div>
+        <span className="profile-badge">Last 30 days</span>
+      </div>
+      <div className="job-analytics-summary">
+        <div><strong>{views}</strong><span>Job views</span></div>
+        <div><strong>{applyClicks}</strong><span>Apply clicks</span></div>
+        <div><strong>{applications}</strong><span>Applications</span></div>
+        <div><strong>{applicationRate}</strong><span>View-to-application rate</span></div>
+      </div>
+      {analytics.length > 0
+        ? <div className="job-analytics-list">{analytics.map((job) => (
+          <article className="job-analytics-row" key={job.id}>
+            <div className="job-analytics-title">
+              <strong><Link href={`/jobs/${job.id}`}>{job.title}</Link></strong>
+              <span className={`status-pill status-${job.status.toLowerCase()}`}>{statusLabel(job.status)}</span>
+            </div>
+            <div className="job-analytics-metrics">
+              <div><span>Views</span><strong>{job.views}</strong></div>
+              <div><span>Apply clicks</span><strong>{job.applyClicks}</strong></div>
+              <div><span>Applications</span><strong>{job.applications}</strong></div>
+              <div><span>Apply rate</span><strong>{job.views ? `${((job.applications / job.views) * 100).toFixed(1)}%` : "0%"}</strong></div>
+            </div>
+          </article>
+        ))}</div>
+        : <div className="dashboard-empty"><p>Post a job to start collecting candidate engagement data.</p><Link className="text-link" href="/dashboard/post-job">Post a job →</Link></div>}
+      <p className="job-analytics-note">Views and apply clicks are counted for active Growth listings. Application counts come from submitted applications.</p>
+    </section>
   );
 }
 

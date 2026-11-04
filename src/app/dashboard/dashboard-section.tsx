@@ -3,9 +3,10 @@ import { Suspense } from "react";
 import DashboardClient from "@/components/dashboard-client";
 import SiteHeader from "@/components/site-header";
 import { getCurrentUser } from "@/lib/auth";
-import { isEmployerPlan, type EmployerPlanKey } from "@/lib/employer-plans";
+import { EMPLOYER_PLANS, isEmployerPlan, type EmployerPlanKey } from "@/lib/employer-plans";
 import { isBkashConfigured } from "@/lib/bkash";
 import { isDemoCompany } from "@/lib/demo-content";
+import type { EmployerJobAnalytics } from "@/lib/employer-analytics";
 import { toPublicJob } from "@/lib/jobs";
 import { prisma } from "@/lib/prisma";
 
@@ -23,7 +24,7 @@ async function DashboardContent({ section }: { section: string }) {
   if (user.role === "ADMIN") redirect("/admin");
   const allowedSections = user.role === "JOB_SEEKER"
     ? ["overview", "applications", "saved", "alerts", "profile", "cv", "notifications"]
-    : ["overview", "post-job", "jobs", "applicants", "candidates", "company", "verification", "plan", "notifications"];
+    : ["overview", "post-job", "jobs", "applicants", "analytics", "candidates", "company", "verification", "plan", "notifications"];
   if (!allowedSections.includes(section)) redirect("/dashboard");
 
   if (user.role === "JOB_SEEKER") {
@@ -266,6 +267,31 @@ async function DashboardContent({ section }: { section: string }) {
       },
     })),
   }));
+  let analytics: EmployerJobAnalytics[] | null = null;
+  if (section === "analytics" && EMPLOYER_PLANS[effectiveEmployerPlan].analyticsDashboard) {
+    const analyticsSince = new Date();
+    analyticsSince.setTime(analyticsSince.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const jobIds = profile.jobs.map((job) => job.id);
+    const events = jobIds.length > 0
+      ? await prisma.jobAnalyticsEvent.groupBy({
+          by: ["jobId", "eventType"],
+          where: { jobId: { in: jobIds }, createdAt: { gte: analyticsSince } },
+          _count: { _all: true },
+        })
+      : [];
+    const eventCounts = new Map<string, number>();
+    for (const event of events) {
+      eventCounts.set(`${event.jobId}:${event.eventType}`, event._count._all);
+    }
+    analytics = profile.jobs.map((job) => ({
+      id: job.id,
+      title: job.title,
+      status: job.status,
+      views: eventCounts.get(`${job.id}:VIEW`) ?? 0,
+      applyClicks: eventCounts.get(`${job.id}:APPLY_CLICK`) ?? 0,
+      applications: job.applications.filter((application) => application.createdAt >= analyticsSince).length,
+    }));
+  }
 
   return (
     <>
@@ -276,6 +302,7 @@ async function DashboardContent({ section }: { section: string }) {
         profile={profile}
         jobs={jobs}
         plan={effectiveEmployerPlan}
+        analytics={analytics}
         paymentConfigured={isBkashConfigured()}
         planExpiresAt={planExpiresAt?.toISOString() ?? null}
         notifications={profile.notifications.map((notification) => ({

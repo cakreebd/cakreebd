@@ -82,11 +82,22 @@ model Job {
   employer       User     @relation(fields: [employerId], references: [id], onDelete: Cascade)
   applications   JobApplication[]
   savedBy        SavedJob[]
+  analyticsEvents JobAnalyticsEvent[]
 
   @@index([status, createdAt])
   @@index([status, featuredUntil, createdAt])
   @@index([category, location, employmentType, workMode])
   @@index([employerId])
+}
+
+model JobAnalyticsEvent {
+  id        String   @id @default(cuid())
+  jobId     Int
+  eventType String
+  createdAt DateTime @default(now())
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId, eventType, createdAt])
 }
 
 model JobApplication {

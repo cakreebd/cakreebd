@@ -18,6 +18,7 @@ const navigation = {
     { href: "/dashboard/post-job", label: "Post a job", section: "post-job" },
     { href: "/dashboard/jobs", label: "Job postings", section: "jobs" },
     { href: "/dashboard/applicants", label: "Applicants", section: "applicants" },
+    { href: "/dashboard/analytics", label: "Analytics", section: "analytics" },
     { href: "/dashboard/candidates", label: "Find candidates", section: "candidates" },
     { href: "/dashboard/company", label: "Company profile", section: "company" },
     { href: "/dashboard/verification", label: "Verification", section: "verification" },

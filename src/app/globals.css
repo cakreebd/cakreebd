@@ -3261,6 +3261,84 @@ button {
   font-size: 12px;
 }
 
+.job-analytics-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.job-analytics-summary > div {
+  display: grid;
+  gap: 5px;
+  padding: 14px;
+  background: #f6f8f6;
+  border: 1px solid #e8eee9;
+  border-radius: 8px;
+}
+
+.job-analytics-summary strong {
+  color: #276b47;
+  font-size: 22px;
+}
+
+.job-analytics-summary span,
+.job-analytics-metrics span {
+  color: #78847c;
+  font-size: 11px;
+}
+
+.job-analytics-list {
+  display: grid;
+}
+
+.job-analytics-row {
+  display: grid;
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px solid #edf1ed;
+}
+
+.job-analytics-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: #30463a;
+  font-size: 14px;
+}
+
+.job-analytics-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.job-analytics-metrics > div {
+  display: grid;
+  gap: 4px;
+}
+
+.job-analytics-metrics strong {
+  color: #34473a;
+  font-size: 15px;
+}
+
+.job-analytics-note,
+.plan-feature-copy {
+  color: #78847c;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.job-analytics-note {
+  margin: 14px 0 0;
+}
+
+.plan-feature-copy {
+  margin: 10px 0 16px;
+}
+
 .employer-job-card {
   padding: 14px 0;
   border-top: 1px solid #edf1ed;
@@ -3501,6 +3579,14 @@ button {
 
   .employer-stats {
     gap: 7px;
+  }
+
+  .job-analytics-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .job-analytics-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .employer-stats > div {
