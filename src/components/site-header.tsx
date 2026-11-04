@@ -12,8 +12,8 @@ export default function SiteHeader({ user }: { user: SessionUser | null }) {
         </Link>
         <nav aria-label="Main navigation" className="main-nav">
           <Link className="nav-link" href="/jobs">Find jobs</Link>
-          <Link className="nav-link" href="/#companies">Companies</Link>
-          <Link className="nav-link" href="/#career-resources">Career resources</Link>
+          <Link className="nav-link" href="/companies">Companies</Link>
+          <Link className="nav-link" href="/career-resources">Career resources</Link>
         </nav>
         <div className="header-actions">
           {user ? (

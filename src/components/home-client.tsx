@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import VerifiedBadge from "@/components/verified-badge";
 import FeaturedBadge from "@/components/featured-badge";
 import DemoBadge from "@/components/demo-badge";
+import { JOB_CATEGORIES, jobCategorySlug } from "@/lib/job-categories";
+import { JOB_LOCATIONS } from "@/lib/job-locations";
 
 export type Job = {
   id: number;
@@ -40,25 +42,7 @@ type HomepageCompany = {
   verified: boolean;
 };
 
-const categories = [
-  { name: "Technology", icon: "tech" },
-  { name: "Marketing", icon: "megaphone" },
-  { name: "Sales", icon: "chart" },
-  { name: "Design", icon: "palette" },
-  { name: "Finance", icon: "wallet" },
-  { name: "Customer service", icon: "headset" },
-];
-
 const locations = ["All locations", "Dhaka", "Chattogram", "Sylhet", "Remote"];
-const popularLocations = [
-  { name: "Dhaka", detail: "Opportunities across the capital" },
-  { name: "Chattogram", detail: "Roles near the port city" },
-  { name: "Sylhet", detail: "Explore work in the northeast" },
-  { name: "Rajshahi", detail: "Find openings in the northwest" },
-  { name: "Khulna", detail: "Discover local opportunities" },
-  { name: "Remote", detail: "Work from anywhere in Bangladesh" },
-];
-
 function Icon({
   name,
   className = "h-5 w-5",
@@ -218,12 +202,6 @@ export default function HomeClient({
     router.push(`/jobs${params.size ? `?${params.toString()}` : ""}`);
   }
 
-  function selectCategory(selected: string) {
-    const nextCategory = category === selected ? "All categories" : selected;
-    setCategory(nextCategory);
-    setFilters((current) => ({ ...current, category: nextCategory }));
-  }
-
   async function toggleSavedJob(jobId: number) {
     setSaveError("");
     const isSaved = savedJobs.includes(jobId);
@@ -297,7 +275,7 @@ export default function HomeClient({
               <span className="sr-only">Select a category</span>
               <select onChange={(event) => setCategory(event.target.value)} value={category}>
                 <option>All categories</option>
-                {categories.map((item) => <option key={item.name}>{item.name}</option>)}
+                {JOB_CATEGORIES.map((item) => <option key={item.name}>{item.name}</option>)}
               </select>
             </label>
             <button aria-label="Search jobs" className="button button-primary search-button" type="submit">
@@ -326,7 +304,7 @@ export default function HomeClient({
         </div>
       </section>
 
-      <section aria-label="Cakree marketplace snapshot" className="trust-strip" id="companies">
+      <section aria-label="Cakree marketplace snapshot" className="trust-strip">
         <div className="marketplace-stat"><strong>{stats.activeJobs.toLocaleString("en-BD")}</strong><span>active opportunities</span></div>
         <div className="marketplace-stat"><strong>{stats.hiringCompanies.toLocaleString("en-BD")}</strong><span>companies hiring</span></div>
         <div className="marketplace-stat"><strong>{stats.verifiedCompanies.toLocaleString("en-BD")}</strong><span>verified companies</span></div>
@@ -341,18 +319,17 @@ export default function HomeClient({
           <p className="section-description">Find a role that fits your skills and the way you want to grow.</p>
         </div>
         <div className="category-grid">
-          {categories.map((item, index) => (
-            <button
-              aria-pressed={category === item.name}
-              className={`category-card${category === item.name ? " category-card-selected" : ""}`}
+          {JOB_CATEGORIES.map((item, index) => (
+            <Link
+              aria-label={`Browse ${item.name} jobs`}
+              className="category-card"
+              href={`/jobs/category/${jobCategorySlug(item.name)}`}
               key={item.name}
-              onClick={() => { selectCategory(item.name); document.getElementById("jobs")?.scrollIntoView({ behavior: "smooth" }); }}
-              type="button"
             >
-              <span className={`category-icon category-icon-${index}`}><Icon className="h-[22px] w-[22px]" name={item.icon} /></span>
-              <span className="category-card-content"><strong>{item.name}</strong><small>{(categoryCounts[item.name] ?? 0).toLocaleString("en-BD")} open roles</small></span>
+              <span className={`category-icon category-icon-${index % 6}`}><Icon className="h-[22px] w-[22px]" name={item.icon} /></span>
+              <span className="category-card-content"><strong>{item.name}</strong><small>{(categoryCounts[item.name] ?? 0).toLocaleString("en-BD")} Jobs Available</small></span>
               <Icon className="category-arrow h-[17px] w-[17px]" name="arrow" />
-            </button>
+            </Link>
           ))}
         </div>
       </section>
@@ -366,8 +343,8 @@ export default function HomeClient({
           <p className="section-description">Search across Bangladesh, or find flexible work you can do from anywhere.</p>
         </div>
         <div className="location-grid">
-          {popularLocations.map((item) => (
-            <Link className="location-card" href={`/jobs?location=${encodeURIComponent(item.name)}`} key={item.name}>
+          {JOB_LOCATIONS.map((item) => (
+            <Link className="location-card" href={`/jobs/location/${item.slug}`} key={item.slug}>
               <span className="location-card-mark"><Icon name="pin" /></span>
               <span><strong>{item.name}</strong><small>{item.detail}</small></span>
               <Icon className="location-card-arrow h-4 w-4" name="arrow" />
@@ -437,7 +414,7 @@ export default function HomeClient({
       {companies.length > 0 && <section aria-labelledby="companies-title" className="section discover-companies">
         <div className="section-heading">
           <div><p className="section-kicker">MEET THE TEAMS</p><h2 id="companies-title">Companies hiring now</h2></div>
-          <p className="section-description">Explore employer profiles and see the roles they’re hiring for.</p>
+          <Link className="text-link" href="/companies">Browse all companies <Icon className="h-4 w-4" name="arrow" /></Link>
         </div>
         <div className="company-discovery-grid">
           {companies.map((company) => <Link className="company-discovery-card" href={`/companies/${company.id}`} key={company.id}>
@@ -449,12 +426,12 @@ export default function HomeClient({
         </div>
       </section>}
 
-      <section aria-labelledby="journey-title" className="journey-section section" id="career-resources">
+      <section aria-labelledby="journey-title" className="journey-section section">
         <div className="journey-intro">
           <p className="section-kicker">YOUR NEXT MOVE, MADE SIMPLE</p>
           <h2 id="journey-title">A clearer path to work that fits.</h2>
           <p>From the first search to your next application, keep your job hunt focused and moving forward.</p>
-          <Link className="button button-primary" href="/jobs">Explore opportunities <Icon className="h-4 w-4" name="arrow" /></Link>
+          <Link className="button button-primary" href="/career-resources">Explore career resources <Icon className="h-4 w-4" name="arrow" /></Link>
         </div>
         <ol className="journey-steps">
           <li>
@@ -473,14 +450,14 @@ export default function HomeClient({
       </section>
 
       <section aria-label="Get started" className="cta-section">
-        <div className="cta-card cta-jobseeker" id="jobseekers">
+        <div className="cta-card cta-jobseeker">
           <span className="cta-label">FOR JOB SEEKERS</span>
           <h2>Your next opportunity<br />is out there.</h2>
           <p>Make a profile and let the right employers find you.</p>
           <Link className="button button-light" href="/register">Create your profile <Icon className="h-4 w-4" name="arrow" /></Link>
           <div aria-hidden="true" className="cta-decoration cta-decoration-one" />
         </div>
-        <div className="cta-card cta-employer" id="employers">
+        <div className="cta-card cta-employer">
           <span className="cta-label">FOR EMPLOYERS</span>
           <h2>Meet the people<br />who move you forward.</h2>
           <p>Reach thoughtful, talented candidates across Bangladesh.</p>
@@ -499,8 +476,8 @@ export default function HomeClient({
             <p>Good work changes everything.<br />Let&apos;s find yours.</p>
           </div>
           <div className="footer-links">
-            <div><strong>For job seekers</strong><a href="#jobs">Find a job</a><a href="#jobseekers">Create a profile</a><a href="#career-resources">How it works</a></div>
-            <div><strong>For employers</strong><a href="#employers">Post a job</a><a href="#companies">Browse companies</a></div>
+            <div><strong>For job seekers</strong><Link href="/jobs">Find a job</Link><Link href="/register">Create a profile</Link><Link href="/career-resources">Career resources</Link></div>
+            <div><strong>For employers</strong><Link href="/register?role=employer">Post a job</Link><Link href="/companies">Browse companies</Link></div>
             <div><strong>Say hello</strong><a href="mailto:hello@cakree.com">Contact us</a><a href="mailto:hello@cakree.com?subject=Support">Help &amp; support</a></div>
           </div>
         </div>

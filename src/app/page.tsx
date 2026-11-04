@@ -5,10 +5,10 @@ import { getCurrentUser } from "@/lib/auth";
 import { toPublicJob } from "@/lib/jobs";
 import { expireFeaturedJobs } from "@/lib/featured-jobs";
 import { DEMO_COMPANY_PREFIX, isDemoCompany } from "@/lib/demo-content";
+import { JOB_CATEGORIES } from "@/lib/job-categories";
 import { prisma } from "@/lib/prisma";
 
 const logoTones = ["coral", "pink", "orange", "navy", "green", "blue", "teal", "purple"];
-const categories = ["Technology", "Marketing", "Sales", "Design", "Finance", "Customer service"];
 
 export default function HomePage() {
   return <Suspense fallback={<main className="route-loading" aria-label="Loading jobs" />}><HomeContent /></Suspense>;
@@ -109,9 +109,9 @@ async function HomeContent() {
           verifiedCompanies: verifiedCompanyCount,
         }}
         categoryCounts={Object.fromEntries(
-          categories.map((category) => [
-            category,
-            categoryCounts.find((item) => item.category === category)?._count._all ?? 0,
+          JOB_CATEGORIES.map(({ name }) => [
+            name,
+            categoryCounts.find((item) => item.category === name)?._count._all ?? 0,
           ]),
         )}
         companies={companies.flatMap((company) => company.companyName

@@ -6,6 +6,8 @@ import { useEffect, useState, type FormEvent } from "react";
 import { EMPLOYER_PLANS, type EmployerPlanKey } from "@/lib/employer-plans";
 import VerifiedBadge from "@/components/verified-badge";
 import FeaturedBadge from "@/components/featured-badge";
+import DemoBadge from "@/components/demo-badge";
+import DashboardSidebar from "@/components/dashboard-sidebar";
 
 type BasicJob = {
   id: number;
@@ -88,6 +90,21 @@ type CandidateApplication = {
 
 type SavedJob = { id: string; job: BasicJob };
 
+type RecommendedJob = {
+  id: number;
+  title: string;
+  company: string;
+  location: string;
+  salary: string;
+  employment: string;
+  category: string;
+  posted: string;
+  tags: string[];
+  featured: boolean;
+  demo: boolean;
+  companyVerified: boolean;
+};
+
 type EmployerJob = {
   id: number;
   title: string;
@@ -131,13 +148,16 @@ type EmployerJob = {
 type Props =
   | {
       mode: "JOB_SEEKER";
+      section: string;
       profile: CandidateProfile;
+      recommendedJobs: RecommendedJob[];
       applications: CandidateApplication[];
       savedJobs: SavedJob[];
       notifications: DashboardNotification[];
     }
   | {
       mode: "EMPLOYER";
+      section: string;
       profile: EmployerProfile;
       jobs: EmployerJob[];
       plan: "FREE" | "STARTER" | "GROWTH";
@@ -148,18 +168,22 @@ type Props =
 
 export default function DashboardClient(props: Props) {
   if (props.mode === "JOB_SEEKER") {
-    return <CandidateDashboard profile={props.profile} initialApplications={props.applications} initialSavedJobs={props.savedJobs} notifications={props.notifications} />;
+    return <CandidateDashboard section={props.section} profile={props.profile} recommendedJobs={props.recommendedJobs} initialApplications={props.applications} initialSavedJobs={props.savedJobs} notifications={props.notifications} />;
   }
-  return <EmployerDashboard profile={props.profile} initialJobs={props.jobs} plan={props.plan} paymentConfigured={props.paymentConfigured} planExpiresAt={props.planExpiresAt} notifications={props.notifications} />;
+  return <EmployerDashboard section={props.section} profile={props.profile} initialJobs={props.jobs} plan={props.plan} paymentConfigured={props.paymentConfigured} planExpiresAt={props.planExpiresAt} notifications={props.notifications} />;
 }
 
 function CandidateDashboard({
+  section,
   profile,
+  recommendedJobs,
   initialApplications,
   initialSavedJobs,
   notifications,
 }: {
+  section: string;
   profile: CandidateProfile;
+  recommendedJobs: RecommendedJob[];
   initialApplications: CandidateApplication[];
   initialSavedJobs: SavedJob[];
   notifications: DashboardNotification[];
@@ -208,6 +232,22 @@ function CandidateDashboard({
         : !bio.trim()
           ? "Add a short introduction"
           : "Keep your profile up to date";
+  const sectionTitles: Record<string, string> = {
+    overview: "Your dashboard",
+    applications: "Application activity",
+    saved: "Saved jobs",
+    alerts: "Job alerts",
+    profile: "My profile",
+    cv: "My CV",
+    notifications: "Notifications",
+  };
+  const scoredRecommendations = recommendedJobs
+    .map((job) => getJobMatch(job, skills, location))
+    .filter((recommendation) => recommendation.score > 0 &&
+      !applications.some((application) => application.job.id === recommendation.job.id) &&
+      !savedJobs.some((savedJob) => savedJob.job.id === recommendation.job.id))
+    .sort((first, second) => second.score - first.score)
+    .slice(0, 4);
 
   useEffect(() => {
     fetch("/api/job-alerts")
@@ -395,20 +435,17 @@ function CandidateDashboard({
 
   return (
     <main className="dashboard-shell">
+      <div className="dashboard-layout">
+      <DashboardSidebar role="JOB_SEEKER" section={section} />
+      <div className="dashboard-content">
       <div className="dashboard-heading">
         <p className="section-kicker">YOUR CAKREE SPACE</p>
-        <h1>Welcome, {profile.name.split(" ")[0]}.</h1>
-        <p>Keep your profile ready and stay close to the roles you care about.</p>
+        <h1>{section === "overview" ? `Welcome, ${profile.name.split(" ")[0]}.` : sectionTitles[section]}</h1>
+        <p>{section === "overview" ? "Keep your profile ready and stay close to the roles you care about." : `Manage ${sectionTitles[section].toLowerCase()} and keep moving toward your next opportunity.`}</p>
       </div>
-      <nav aria-label="Job seeker dashboard sections" className="dashboard-shortcuts">
-        <a href="#candidate-applications">Applications</a>
-        <a href="#candidate-profile">My profile</a>
-        <a href="#candidate-saved">Saved jobs</a>
-        <a href="#candidate-alerts">Job alerts</a>
-        <Link href="/resume">Resume builder</Link>
-        <Link href="/jobs">Find jobs <span aria-hidden="true">↗</span></Link>
-      </nav>
+      {section === "overview" && <div className="dashboard-shortcuts"><Link href="/jobs">Find jobs <span aria-hidden="true">↗</span></Link><Link href="/career-resources">Career resources</Link></div>}
       {(error || message) && <p className={error ? "form-error" : "form-success"} role={error ? "alert" : "status"}>{error || message}</p>}
+      {section === "overview" && <>
       <section aria-label="Profile readiness" className="profile-readiness">
         <div className="profile-readiness-copy">
           <span className="readiness-mark" aria-hidden="true">✦</span>
@@ -423,6 +460,24 @@ function CandidateDashboard({
           <strong>{profileCompletion}%</strong>
           <a href="#candidate-profile">{profileCompletion === 100 ? "Review profile" : "Complete profile"} <span aria-hidden="true">→</span></a>
         </div>
+      </section>
+      <section aria-labelledby="job-matches-title" className="job-match-section">
+        <div className="job-match-heading">
+          <div><p className="section-kicker">PERSONALIZED FOR YOU</p><h2 id="job-matches-title">Your best job matches</h2><p>Recommendations are based on the skills and location in your profile.</p></div>
+          <Link className="text-link" href="/jobs">Explore all jobs →</Link>
+        </div>
+        {scoredRecommendations.length > 0 ? <div className="job-match-grid">{scoredRecommendations.map(({ job, score, matchedSkills, locationMatches }) => (
+          <Link className="job-match-card" href={`/jobs/${job.id}`} key={job.id}>
+            <div className="job-match-card-top"><span className="job-match-score">{score}% match</span><span>{job.featured && <FeaturedBadge />}{job.demo && <DemoBadge />}</span></div>
+            <strong>{job.title}</strong>
+            <span className="job-match-company">{job.company}{job.companyVerified && <VerifiedBadge />}</span>
+            <span className="job-match-meta">{job.location} · {job.employment}</span>
+            <span className="job-match-reason">{matchedSkills.length ? `Matches your ${matchedSkills.slice(0, 3).join(", ")} skills` : locationMatches ? "Matches your preferred location" : "Recommended for you"}</span>
+          </Link>
+        ))}</div> : <div className="job-match-empty">
+          <p>{skills.trim() || location.trim() ? "We couldn’t find a close match in current openings yet. Keep your profile current and check back soon." : "Add skills or a preferred location to your profile to get personalized job matches."}</p>
+          <Link className="button button-outline" href="/dashboard/profile">Update profile</Link>
+        </div>}
       </section>
       <div aria-label="Application overview" className="application-overview">
         <div><strong>{applications.length}</strong><span>Total applications</span></div>
@@ -444,8 +499,16 @@ function CandidateDashboard({
           </article>
         ))}</div>
       </section>}
-      <div className="dashboard-columns">
+      </>}
+      {section === "overview" && <div className="dashboard-quick-links">
+        <Link href="/dashboard/applications"><strong>Applications</strong><span>Follow interview and hiring updates →</span></Link>
+        <Link href="/dashboard/saved"><strong>Saved jobs</strong><span>Return to roles you want to explore →</span></Link>
+        <Link href="/dashboard/alerts"><strong>Job alerts</strong><span>Get new opportunities that fit →</span></Link>
+        <Link href="/dashboard/profile"><strong>My profile</strong><span>Keep your professional details current →</span></Link>
+      </div>}
+      <div className={`dashboard-columns${["overview", "profile", "applications", "saved", "alerts", "cv", "notifications"].includes(section) ? " dashboard-single-column" : ""}`}>
         <div className="dashboard-main-column">
+          {section === "profile" &&
           <section className="dashboard-card" id="candidate-profile">
             <div className="dashboard-card-heading"><div><p className="section-kicker">YOUR STORY</p><h2>Candidate profile</h2></div><span className="profile-badge">{profile.email}</span></div>
             <form className="dashboard-form" onSubmit={saveProfile}>
@@ -460,8 +523,9 @@ function CandidateDashboard({
               <label className="full-width"><span>Email updates</span><span className="visibility-option"><input checked={emailNotifications} className="visibility-checkbox" onChange={(event) => setEmailNotifications(event.target.checked)} type="checkbox" /><span>Send me interview and application updates, plus matching job-alert emails.</span></span></label>
               <button className="button button-primary" disabled={busy} type="submit">{busy ? "Saving..." : "Save profile"}</button>
             </form>
-          </section>
+          </section>}
 
+          {section === "applications" &&
           <section className="dashboard-card" id="candidate-applications">
             <div className="dashboard-card-heading"><div><p className="section-kicker">YOUR APPLICATIONS</p><h2>Application activity</h2></div><span className="count-badge">{applications.length}</span></div>
             {applications.length > 0 && <div aria-label="Filter applications" className="application-filters">
@@ -489,8 +553,9 @@ function CandidateDashboard({
                 <div className="activity-status"><span className={`status-pill status-${application.status.toLowerCase()}`}>{statusLabel(application.status)}</span><small>{formatDate(application.createdAt)}</small></div>
               </article>
             ))}</div> : <div className="dashboard-empty"><p>No applications in this view yet.</p><button className="subtle-button" onClick={() => setApplicationFilter("ALL")} type="button">Show all applications</button></div> : <div className="dashboard-empty"><p>You haven’t applied for a role yet.</p><Link className="text-link" href="/jobs">Explore open jobs →</Link></div>}
-          </section>
+          </section>}
 
+          {section === "saved" &&
           <section className="dashboard-card" id="candidate-saved">
             <div className="dashboard-card-heading"><div><p className="section-kicker">SAVED FOR LATER</p><h2>Saved jobs</h2></div><span className="count-badge">{savedJobs.length}</span></div>
             {savedJobs.length ? <div className="dashboard-list">{savedJobs.map((saved) => (
@@ -499,8 +564,9 @@ function CandidateDashboard({
                 <button className="subtle-button" onClick={() => removeSavedJob(saved.job.id)} type="button">Remove</button>
               </article>
             ))}</div> : <div className="dashboard-empty"><p>Save interesting roles and they’ll be waiting here.</p><Link className="text-link" href="/jobs">Find a job →</Link></div>}
-          </section>
+          </section>}
 
+          {section === "alerts" &&
           <section className="dashboard-card" id="candidate-alerts">
             <div className="dashboard-card-heading"><div><p className="section-kicker">STAY IN THE LOOP</p><h2>Job alerts</h2></div><span className="count-badge">{alerts.length}</span></div>
             <form className="dashboard-form" onSubmit={createAlert}>
@@ -516,15 +582,17 @@ function CandidateDashboard({
                 <button className="subtle-button" onClick={() => removeAlert(alert.id)} type="button">Remove</button>
               </article>
             ))}</div> : <div className="dashboard-empty"><p>Save a search to see matching jobs here whenever you return.</p></div>}
-          </section>
+          </section>}
         </div>
 
         <aside className="dashboard-side-column">
+          {section === "cv" &&
           <section className="dashboard-card">
             <p className="section-kicker">CAREER TOOLS</p><h2>Build your resume</h2>
             <p>Turn your profile and experience into a polished, printable resume.</p>
             <Link className="button button-outline" href="/resume">Open resume builder</Link>
-          </section>
+          </section>}
+          {section === "cv" &&
           <section className="dashboard-card cv-card">
             <p className="section-kicker">YOUR CV</p><h2>Make it easy to say yes.</h2>            <p>Upload a PDF or DOCX CV (up to 5 MB). Employers can access it when you apply for their job.</p>
             {cvName ? <div className="cv-file"><a href="/api/profile/cv">{cvName}</a><button className="subtle-button" onClick={removeCv} type="button">Remove</button></div> : <p className="cv-empty">No CV uploaded yet</p>}
@@ -532,16 +600,19 @@ function CandidateDashboard({
               <label className="upload-field">Choose a CV<input accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" name="cv" required type="file" /></label>
               <button className="button button-outline" disabled={busy} type="submit">{busy ? "Uploading..." : "Upload CV"}</button>
             </form>
-          </section>
-          <section className="dashboard-tip"><p className="section-kicker">A QUICK TIP</p><h2>Keep your profile fresh.</h2><p>A clear headline and a few relevant skills help employers understand what you bring.</p></section>
+          </section>}
+          {section === "overview" && <section className="dashboard-tip"><p className="section-kicker">A QUICK TIP</p><h2>Keep your profile fresh.</h2><p>A clear headline and a few relevant skills help employers understand what you bring.</p></section>}
         </aside>
       </div>
-      <NotificationPanel notifications={notifications} />
+      {section === "notifications" && <NotificationPanel notifications={notifications} />}
+      </div>
+      </div>
     </main>
   );
 }
 
 function EmployerDashboard({
+  section,
   profile,
   initialJobs,
   plan: initialPlan,
@@ -549,6 +620,7 @@ function EmployerDashboard({
   planExpiresAt,
   notifications,
 }: {
+  section: string;
   profile: EmployerProfile;
   initialJobs: EmployerJob[];
   plan: EmployerPlanKey;
@@ -855,22 +927,37 @@ function EmployerDashboard({
           href: "#employer-candidates",
           action: "Find candidates",
         };
+  const sectionTitles: Record<string, string> = {
+    overview: "Hiring overview",
+    "post-job": "Post a job",
+    jobs: "Job postings",
+    applicants: "Applicants",
+    candidates: "Find candidates",
+    company: "Company profile",
+    verification: "Company verification",
+    plan: "Hiring package",
+    notifications: "Notifications",
+  };
+  const singleColumnSections = ["overview", "post-job", "jobs", "applicants", "candidates", "company", "verification", "plan", "notifications"];
 
   return (
     <main className="dashboard-shell">
+      <div className="dashboard-layout">
+      <DashboardSidebar role="EMPLOYER" section={section} />
+      <div className="dashboard-content">
       <div className="dashboard-heading">
         <p className="section-kicker">EMPLOYER WORKSPACE</p>
-        <h1>{profile.companyName || "Your company"} dashboard</h1>
-        <p>Post openings and keep your hiring moving.</p>
+        <h1>{section === "overview" ? `${profile.companyName || "Your company"} dashboard` : sectionTitles[section]}</h1>
+        <p>{section === "overview" ? "Post openings and keep your hiring moving." : `Manage ${sectionTitles[section].toLowerCase()} and keep your hiring moving.`}</p>
       </div>
-      <nav aria-label="Employer dashboard sections" className="dashboard-shortcuts">
-        <a href="#employer-post-job">Post a job</a>
-        <a href="#employer-applications">Applicants</a>
-        <a href="#employer-candidates">Find candidates</a>
-        <a href="#employer-company">Company profile</a>
-        <a href="#employer-plan">Hiring package</a>
-      </nav>
+      {section === "overview" && <div className="dashboard-quick-links">
+        <Link href="/dashboard/post-job"><strong>Post a job</strong><span>Publish a new opportunity →</span></Link>
+        <Link href="/dashboard/jobs"><strong>Job postings</strong><span>Manage your active openings →</span></Link>
+        <Link href="/dashboard/applicants"><strong>Applicants</strong><span>Review candidates and schedule interviews →</span></Link>
+        <Link href="/dashboard/candidates"><strong>Find candidates</strong><span>Search profiles shared for discovery →</span></Link>
+      </div>}
       {(error || message || paymentMessage) && <p className={error ? "form-error" : "form-success"} role={error ? "alert" : "status"}>{error || message || paymentMessage}</p>}
+      {section === "overview" && <>
       <div className="employer-stats"><div><strong>{activeJobCount}</strong><span>Active jobs</span></div><div><strong>{totalApplications}</strong><span>Applications</span></div><div><strong>{inReviewCount}</strong><span>To review</span></div><div><strong>{shortlistedCount}</strong><span>Shortlisted</span></div></div>
       <div className="hiring-focus">
         <div><strong>{hiringFocus.title}</strong><p>{hiringFocus.description}</p></div>
@@ -885,8 +972,10 @@ function EmployerDashboard({
           <div className="hiring-pipeline-stage hiring-pipeline-interviews"><span className="hiring-pipeline-stage-label">Interviews scheduled</span><strong>{interviewCount}</strong><span className="hiring-pipeline-stage-note">Across all your openings</span></div>
         </div>
       </section>
-      <div className="dashboard-columns employer-columns">
+      </>}
+      <div className={`dashboard-columns employer-columns${singleColumnSections.includes(section) ? " dashboard-single-column" : ""}`}>
         <div className="dashboard-main-column">
+          {section === "post-job" &&
           <section className="dashboard-card" id="employer-post-job">
             <div className="dashboard-card-heading"><div><p className="section-kicker">CREATE AN OPPORTUNITY</p><h2>Post a job</h2></div></div>
             <form className="dashboard-form" onSubmit={createJob}>
@@ -906,11 +995,12 @@ function EmployerDashboard({
               <p className="label-hint">Package usage: {activeJobCount} / {EMPLOYER_PLANS[plan].activeJobLimit} active jobs</p>
               <button className="button button-primary" disabled={busy || activeJobCount >= EMPLOYER_PLANS[plan].activeJobLimit} type="submit">{activeJobCount >= EMPLOYER_PLANS[plan].activeJobLimit ? "Active-job limit reached" : busy ? "Publishing..." : "Publish job"}</button>
             </form>
-          </section>
+          </section>}
 
+          {(section === "jobs" || section === "applicants") &&
           <section className="dashboard-card" id="employer-applications">
             <div className="dashboard-card-heading"><div><p className="section-kicker">YOUR OPENINGS</p><h2>Job postings</h2></div><span className="count-badge">{jobs.length}</span></div>
-            {jobs.length > 0 && <div className="applicant-filters">
+            {section === "applicants" && jobs.length > 0 && <div className="applicant-filters">
               <label>Find an applicant<input onChange={(event) => setApplicantSearch(event.target.value)} placeholder="Name, email, skills, or job title" value={applicantSearch} /></label>
               <label>Application stage<select onChange={(event) => setApplicationStatusFilter(event.target.value)} value={applicationStatusFilter}>
                 <option value="ALL">All stages</option>
@@ -927,8 +1017,9 @@ function EmployerDashboard({
               return (
               <article className="employer-job-card" key={job.id}>
                 <div className="employer-job-heading"><div><h3><Link href={`/jobs/${job.id}`}>{job.title}</Link>{job.featured && <FeaturedBadge />}</h3><p>{job.location} · {job.employment} · {job.salary} / month</p></div><span className={`status-pill status-${job.status.toLowerCase()}`}>{statusLabel(job.status)}</span></div>
-                <div className="applicant-list-heading"><strong>{visibleApplications.length}{visibleApplications.length !== job.applications.length ? ` of ${job.applications.length}` : ""} {visibleApplications.length === 1 ? "application" : "applications"}</strong><button className="subtle-button" onClick={() => updateJobStatus(job.id, job.status === "ACTIVE" ? "CLOSED" : "ACTIVE")} type="button">{job.status === "ACTIVE" ? "Close job" : "Reopen job"}</button></div>
-                {visibleApplications.length > 0 ? <div className="applicant-list">{visibleApplications.map((application) => (
+                <div className="applicant-list-heading"><strong>{job.applications.length} {job.applications.length === 1 ? "application" : "applications"}</strong><button className="subtle-button" onClick={() => updateJobStatus(job.id, job.status === "ACTIVE" ? "CLOSED" : "ACTIVE")} type="button">{job.status === "ACTIVE" ? "Close job" : "Reopen job"}</button></div>
+                {section === "jobs" && <p className="applicant-filter-empty"><Link className="text-link" href="/dashboard/applicants">Review applicants →</Link></p>}
+                {section === "applicants" && (visibleApplications.length > 0 ? <div className="applicant-list">{visibleApplications.map((application) => (
                   <div className="applicant-row" key={application.id}>
                     <div><strong>{application.applicant.name}</strong><p>{application.applicant.headline || application.applicant.location || application.applicant.email}</p>{application.applicant.skills.length > 0 && <small>{application.applicant.skills.join(" · ")}</small>}{application.coverLetter && <blockquote>{application.coverLetter}</blockquote>}{application.applicant.cvFileName && <a className="cv-download-link" href={`/api/applications/${application.id}/cv`}>Download CV · {application.applicant.cvFileName}</a>}
                       {application.interviews.filter((interview) => interview.status === "SCHEDULED").map((interview) => <p key={interview.id}>Interview: {formatDateTime(interview.scheduledAt)}{interview.location ? ` · ${interview.location}` : ""}{interview.meetingUrl ? <> · <a className="text-link" href={interview.meetingUrl} rel="noreferrer" target="_blank">Meeting link</a></> : ""}</p>)}
@@ -944,13 +1035,19 @@ function EmployerDashboard({
                   </div>
                 ))}</div> : job.applications.length > 0
                   ? <p className="applicant-filter-empty">No applicants match these filters.</p>
-                  : <p className="applicant-filter-empty">No applications yet. Applicants will appear here when they apply.</p>}
+                  : <p className="applicant-filter-empty">No applications yet. Applicants will appear here when they apply.</p>)}
               </article>
               );
             })}</div> : <div className="dashboard-empty"><p>No openings yet. Add your first role above to meet candidates.</p></div>}
-          </section>
+          </section>}
         </div>
         <aside className="dashboard-side-column">
+          {section === "overview" && <section className="dashboard-card">
+            <p className="section-kicker">YOUR HIRING PACKAGE</p><h2>{EMPLOYER_PLANS[plan].name}</h2>
+            <p>{activeJobCount} of {EMPLOYER_PLANS[plan].activeJobLimit} active job slots used.</p>
+            <Link className="button button-outline" href="/dashboard/plan">View package options</Link>
+          </section>}
+          {section === "candidates" &&
           <section className="dashboard-card" id="employer-candidates">
             <p className="section-kicker">RECRUITING TOOLS</p><h2>Search candidates</h2>
             <p>Only candidates who have opted into employer discovery are shown. CVs and contact details remain private until they apply.</p>
@@ -966,7 +1063,8 @@ function EmployerDashboard({
               </article>
             ))}</div>}
             {candidateResults.length === 0 && <p className="cv-empty">Search results appear here. Candidates control their visibility from their profile.</p>}
-          </section>
+          </section>}
+          {section === "plan" &&
           <section className="dashboard-card" id="employer-plan">
             <p className="section-kicker">HIRING PACKAGES</p><h2>{EMPLOYER_PLANS[plan].name} package</h2>
             <p>{activeJobCount} of {EMPLOYER_PLANS[plan].activeJobLimit} active job slots used.{planExpiresAt ? ` Expires ${formatDate(planExpiresAt)}.` : ""}</p>
@@ -978,7 +1076,8 @@ function EmployerDashboard({
               </article>
             ))}</div>
             <p className="demo-notice">{paymentConfigured ? "Paid plans activate only after bKash confirms the exact amount, currency, and invoice. Set up bKash sandbox credentials before production." : "bKash checkout is disabled until server credentials, a token encryption key, and a public HTTPS SITE_URL are configured."}</p>
-          </section>
+          </section>}
+          {section === "company" &&
           <section className="dashboard-card" id="employer-company">
             <p className="section-kicker">YOUR COMPANY</p><h2>Company profile</h2>
             {verification?.status === "VERIFIED" && <p className="verification-state"><VerifiedBadge /> Your company registration has been reviewed.</p>}
@@ -990,7 +1089,8 @@ function EmployerDashboard({
               <label className="visibility-option"><input checked={emailNotifications} className="visibility-checkbox" onChange={(event) => setEmailNotifications(event.target.checked)} type="checkbox" /> Send application and interview updates to this account by email.</label>
               <button className="button button-outline" disabled={busy} type="submit">Save company profile</button>
             </form>
-          </section>
+          </section>}
+          {section === "verification" &&
           <section className="dashboard-card">
             <p className="section-kicker">BUILD TRUST</p><h2>Company verification</h2>
             {verification?.status === "PENDING" && <p className="verification-state">Your request is awaiting admin review.</p>}
@@ -1007,18 +1107,29 @@ function EmployerDashboard({
               <label>Registration number<input maxLength={100} minLength={3} onChange={(event) => setRegistrationNumber(event.target.value)} required value={registrationNumber} /></label>
               <button className="button button-outline" disabled={busy} type="submit">{busy ? "Submitting..." : verification?.status === "REJECTED" ? "Resubmit for review" : verification?.status === "PENDING" ? "Update submitted details" : "Request verification"}</button>
             </form>}
-          </section>
+          </section>}
         </aside>
       </div>
-      <NotificationPanel notifications={notifications} />
+      {section === "notifications" && <NotificationPanel notifications={notifications} />}
+      </div>
+      </div>
     </main>
   );
+}
+
+function getJobMatch(job: RecommendedJob, skillsText: string, preferredLocation: string) {
+  const skills = [...new Set(skillsText.split(",").map((skill) => skill.trim().toLowerCase()).filter(Boolean))];
+  const searchableText = `${job.title} ${job.category} ${job.tags.join(" ")}`.toLowerCase();
+  const matchedSkills = skills.filter((skill) => searchableText.includes(skill));
+  const locationMatches = Boolean(preferredLocation.trim() && job.location.toLowerCase().includes(preferredLocation.trim().toLowerCase()));
+  const skillScore = skills.length ? (matchedSkills.length / skills.length) * 80 : 0;
+  const score = Math.round(skillScore + (locationMatches ? 20 : 0));
+  return { job, score, matchedSkills, locationMatches };
 }
 
 function NotificationPanel({ notifications }: { notifications: DashboardNotification[] }) {
   const [items, setItems] = useState(notifications);
   const [error, setError] = useState("");
-  if (items.length === 0) return null;
 
   async function markAllRead() {
     setError("");
@@ -1037,13 +1148,13 @@ function NotificationPanel({ notifications }: { notifications: DashboardNotifica
 
   return (
     <section className="dashboard-card">
-      <div className="dashboard-card-heading"><div><p className="section-kicker">UPDATES</p><h2>Notifications</h2></div><button className="subtle-button" onClick={markAllRead} type="button">Mark all read</button></div>
+      <div className="dashboard-card-heading"><div><p className="section-kicker">UPDATES</p><h2>Notifications</h2></div>{items.length > 0 && <button className="subtle-button" onClick={markAllRead} type="button">Mark all read</button>}</div>
       {error && <p className="form-error" role="alert">{error}</p>}
-      <div className="dashboard-list">{items.map((notification) => (
+      {items.length > 0 ? <div className="dashboard-list">{items.map((notification) => (
         <article className="activity-row" key={notification.id}>
           <div><strong>{notification.href ? <Link className="activity-title" href={notification.href}>{notification.title}</Link> : notification.title}</strong><p>{notification.message}</p><small>{formatDate(notification.createdAt)}</small></div>
         </article>
-      ))}</div>
+      ))}</div> : <div className="dashboard-empty"><p>You’re all caught up. New application and interview updates will appear here.</p></div>}
     </section>
   );
 }
