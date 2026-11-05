@@ -99,34 +99,90 @@ async function JobDetailContent({ params }: PageProps) {
     <>
       <SiteHeader user={user} />
       {!isDemo && <JobViewTracker jobId={job.id} />}
-      <main className="page-shell detail-layout">
+      <main className="page-shell detail-layout job-detail-layout">
         <div className="detail-main">
-          <Link className="back-link" href="/jobs">← Back to job search</Link>
-          <article className="detail-card">
-            <div className="detail-company-row">
-              <span className="result-logo detail-logo">{job.companyName.slice(0, 1).toUpperCase()}</span>
-              <div>{hasCompanyProfile ? <Link className="result-company" href={`/companies/${job.employer.id}`}>{job.companyName}</Link> : <div className="result-company">{job.companyName}</div>}{isDemo && <DemoBadge />}{hasCompanyProfile && job.employer.companyVerification?.status === "VERIFIED" && <VerifiedBadge />}<p>{job.location} · Posted {postedLabel(job.createdAt)}</p></div>
-            </div>
-            <h2>{job.title}{job.featuredUntil && job.featuredUntil > new Date() && <FeaturedBadge />}</h2>
+          <nav aria-label="Breadcrumb" className="detail-breadcrumb">
+            <Link href="/jobs">Jobs</Link>
+            <span aria-hidden="true">/</span>
+            <Link href={`/jobs?category=${encodeURIComponent(job.category)}`}>{job.category}</Link>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">{job.title}</span>
+          </nav>
+          <article className="detail-card job-detail-card">
+            <header className="job-detail-header">
+              <div className="detail-company-row">
+                <span aria-hidden="true" className="result-logo detail-logo">{job.companyName.slice(0, 1).toUpperCase()}</span>
+                <div className="job-detail-company">
+                  <div className="job-detail-company-name">
+                    {hasCompanyProfile
+                      ? <Link className="result-company" href={`/companies/${job.employer.id}`}>{job.companyName}</Link>
+                      : <span className="result-company">{job.companyName}</span>}
+                    {isDemo && <DemoBadge />}
+                    {hasCompanyProfile && job.employer.companyVerification?.status === "VERIFIED" && <VerifiedBadge />}
+                  </div>
+                  <p>Posted {postedLabel(job.createdAt)} <span aria-hidden="true">·</span> {job.location}</p>
+                </div>
+              </div>
+              <h1>{job.title}</h1>
+              <div className="job-detail-status">
+                <span className="job-active-badge"><span aria-hidden="true" /> Actively hiring</span>
+                {job.featuredUntil && job.featuredUntil > new Date() && <FeaturedBadge />}
+              </div>
+            </header>
             {isDemo && <p className="demo-job-warning" role="note">This is a fictional sample listing for preview purposes, not a real vacancy. Applications are disabled for demo jobs.</p>}
-            <div className="result-meta"><span>{job.employmentType}</span><span>{job.workMode}</span><span>{job.category}</span><span>{job.location}</span></div>
-            <p className="detail-salary">{formatSalary(job.salaryMin, job.salaryMax)} <small>per month</small></p>
-            <section className="detail-section"><h2>About the role</h2><p>{job.description}</p></section>
-            <section className="detail-section"><h2>What you’ll bring</h2><p>{job.requirements}</p></section>
-            {job.benefits && <section className="detail-section"><h2>Benefits</h2><p>{job.benefits}</p></section>}
-            {tags.length > 0 && <div className="dialog-tags">{tags.map((tag) => <span key={tag}>{tag}</span>)}</div>}
+            <div aria-label="Job details" className="job-detail-facts">
+              <span>{job.employmentType}</span>
+              <span>{job.workMode}</span>
+              <span>{job.category}</span>
+              <span>{job.location}</span>
+            </div>
+            <div className="detail-salary-card">
+              <span className="detail-salary-label">Monthly salary</span>
+              <p className="detail-salary">{formatSalary(job.salaryMin, job.salaryMax)}</p>
+              <small>Salary details are provided by the employer.</small>
+            </div>
+            <section aria-labelledby="job-description-heading" className="detail-section">
+              <h2 id="job-description-heading">About the role</h2>
+              <p>{job.description}</p>
+            </section>
+            <section aria-labelledby="job-requirements-heading" className="detail-section">
+              <h2 id="job-requirements-heading">What you’ll bring</h2>
+              <p>{job.requirements}</p>
+            </section>
+            {job.benefits && <section aria-labelledby="job-benefits-heading" className="detail-section">
+              <h2 id="job-benefits-heading">Benefits</h2>
+              <p>{job.benefits}</p>
+            </section>}
+            {tags.length > 0 && <section aria-labelledby="job-skills-heading" className="detail-section job-skills-section">
+              <h2 id="job-skills-heading">Skills and qualifications</h2>
+              <div className="dialog-tags">{tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
+            </section>}
           </article>
         </div>
-        <aside className="detail-sidebar">
-          <div className="detail-action-card">
+        <aside aria-label="Apply and learn more" className="detail-sidebar job-detail-sidebar">
+          <div className="detail-action-card job-apply-card">
+            <p className="section-kicker">NEXT STEP</p>
             <h2>Interested in this role?</h2>
-            <p>Send your application directly to {job.companyName}.</p>
+            <p>Apply directly to {job.companyName}. You can include a cover letter with your application.</p>
             {isDemo
               ? <p className="demo-job-apply-note">Demo listing — you can explore the page, but applications are disabled.</p>
               : <ApplyButton alreadyApplied={applied} isJobSeeker={user?.role === "JOB_SEEKER"} jobId={job.id} signedIn={Boolean(user)} />}
-            <SaveJobButton initiallySaved={saved} jobId={job.id} />
+            <div className="job-save-row">
+              <span>Save this job for later</span>
+              <SaveJobButton initiallySaved={saved} jobId={job.id} />
+            </div>
           </div>
-          <div className="detail-action-card company-about"><h2>About {job.companyName}</h2>{hasCompanyProfile ? <><p>{job.employer.companyBio || "Learn more about this employer and explore their opportunities."}</p><Link className="text-link" href={`/companies/${job.employer.id}`}>View company profile →</Link>{job.employer.website && <a className="text-link" href={job.employer.website} rel="noreferrer" target="_blank">Visit company website ↗</a>}</> : <p>This sample listing does not have a public company profile yet.</p>}</div>
+          <section aria-labelledby="company-about-heading" className="detail-action-card company-about">
+            <p className="section-kicker">THE EMPLOYER</p>
+            <h2 id="company-about-heading">About {job.companyName}</h2>
+            {hasCompanyProfile
+              ? <>
+                <p>{job.employer.companyBio || "Learn more about this employer and explore their opportunities."}</p>
+                <Link className="text-link" href={`/companies/${job.employer.id}`}>View company profile →</Link>
+                {job.employer.website && <a className="text-link" href={job.employer.website} rel="noreferrer" target="_blank">Visit company website ↗</a>}
+              </>
+              : <p>This sample listing does not have a public company profile yet.</p>}
+          </section>
           {relatedJobs.length > 0 && <section aria-labelledby="related-jobs-heading" className="detail-action-card related-jobs-card">
             <h2 id="related-jobs-heading">More roles like this</h2>
             {relatedJobs.map((relatedJob) => <article className="related-job" key={relatedJob.id}>
