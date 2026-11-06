@@ -6,6 +6,7 @@ import {
   unauthorizedResponse,
 } from "@/lib/auth";
 import { badRequest, readJson } from "@/lib/http";
+import { expireJobs } from "@/lib/featured-jobs";
 import { prisma } from "@/lib/prisma";
 
 const alertSchema = z.object({
@@ -20,6 +21,7 @@ export async function GET(request: Request) {
   const user = await currentUserFromRequest(request);
   if (!user) return unauthorizedResponse();
   if (user.role !== "JOB_SEEKER") return roleRequiredResponse();
+  await expireJobs();
 
   const alerts = await prisma.jobAlert.findMany({
     where: { userId: user.id, active: true },

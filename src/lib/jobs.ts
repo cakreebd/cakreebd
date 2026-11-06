@@ -55,5 +55,6 @@ export function toPublicJob(job: Job) {
     benefits: job.benefits,
     tags: parseTags(job.tags),
     status: job.status,
+    deadlineAt: job.deadlineAt,
   };
 }

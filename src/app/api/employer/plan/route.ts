@@ -8,12 +8,14 @@ import {
 import { badRequest, readJson } from "@/lib/http";
 import { EMPLOYER_PLANS, isEmployerPlan, type EmployerPlanKey } from "@/lib/employer-plans";
 import { isBkashConfigured } from "@/lib/bkash";
+import { expireJobs } from "@/lib/featured-jobs";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(request: Request) {
   const user = await currentUserFromRequest(request);
   if (!user) return unauthorizedResponse();
   if (user.role !== "EMPLOYER") return roleRequiredResponse();
+  await expireJobs();
   const plan = await prisma.employerPlan.upsert({
     where: { userId: user.id },
     create: { userId: user.id },
@@ -49,6 +51,7 @@ export async function PUT(request: Request) {
   const user = await currentUserFromRequest(request);
   if (!user) return unauthorizedResponse();
   if (user.role !== "EMPLOYER") return roleRequiredResponse();
+  await expireJobs();
   const body = await readJson(request);
   if (body.response) return body.response;
   const parsed = z.object({ plan: z.literal("FREE") }).safeParse(body.data);

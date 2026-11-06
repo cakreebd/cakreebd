@@ -9,7 +9,7 @@ import DemoBadge from "@/components/demo-badge";
 import { getCurrentUser } from "@/lib/auth";
 import { dateDaysAgo, formatSalary, postedLabel } from "@/lib/jobs";
 import { isDemoCompany } from "@/lib/demo-content";
-import { expireFeaturedJobs } from "@/lib/featured-jobs";
+import { expireJobs } from "@/lib/featured-jobs";
 import { prisma } from "@/lib/prisma";
 
 type PageProps = {
@@ -27,7 +27,7 @@ export default function JobsPage({ searchParams }: PageProps) {
 
 async function JobsContent({ searchParams }: PageProps) {
   const [params, user] = await Promise.all([searchParams, getCurrentUser()]);
-  await expireFeaturedJobs();
+  await expireJobs();
   const get = (key: string) => {
     const value = params[key];
     return (Array.isArray(value) ? value[0] : value ?? "").trim().slice(0, 120);

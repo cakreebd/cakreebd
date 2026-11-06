@@ -5,6 +5,7 @@ import {
   unauthorizedResponse,
 } from "@/lib/auth";
 import { notFound } from "@/lib/http";
+import { expireJobs } from "@/lib/featured-jobs";
 import { prisma } from "@/lib/prisma";
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -13,6 +14,7 @@ export async function POST(request: Request, { params }: RouteContext) {
   const user = await currentUserFromRequest(request);
   if (!user) return unauthorizedResponse();
   if (user.role !== "JOB_SEEKER") return roleRequiredResponse();
+  await expireJobs();
   const id = Number((await params).id);
   if (!Number.isInteger(id) || id < 1) return notFound("Job not found.");
 

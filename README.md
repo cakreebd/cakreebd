@@ -36,6 +36,7 @@ Use a separate job-seeker account to try candidate profiles, saved jobs, CV uplo
 - Candidate profile, skills, preferred location, and private CV upload (PDF/DOCX, maximum 5 MB; local files in development, private Vercel Blob in deployments)
 - Persistent saved jobs and job applications with optional cover letters
 - Employer company profile, job posting, job status management, and application review
+- Job postings automatically close one calendar month after publishing; employers can reopen a listing for another month
 - Public company pages with active openings
 - Candidate directory search for job seekers who explicitly opt in; email and CV remain private
 - Interview scheduling with in-app candidate and employer notifications
@@ -79,7 +80,9 @@ Preview deployments should use a separate PostgreSQL database/branch from produc
 
 Employer package prices are shown in Bangladeshi taka. Paid package entitlements are granted only after bKash payment verification; checkout requires merchant credentials and a public HTTPS callback URL.
 
-### Email delivery
+### Email delivery and job expiry
+
+The scheduled job-alert endpoint also closes listings after their one-calendar-month deadline. Configure the scheduled request below to ensure expired listings are closed even when nobody visits the site.
 
 Set `RESEND_API_KEY`, a verified `EMAIL_FROM`, and `SITE_URL` to enable email. Users must opt in under their dashboard profile. Interview/application emails are sent when those events occur. Configure a scheduled job (for example every 15 minutes) to `POST /api/cron/job-alerts` with a Bearer token containing the server-side `CRON_SECRET`. Keep the secret in your scheduler, never in browser code.
 

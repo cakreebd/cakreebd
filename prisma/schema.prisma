@@ -78,6 +78,7 @@ model Job {
   status         String   @default("ACTIVE")
   featuredUntil  DateTime?
   createdAt      DateTime @default(now())
+  deadlineAt     DateTime
   updatedAt      DateTime @updatedAt
   employer       User     @relation(fields: [employerId], references: [id], onDelete: Cascade)
   applications   JobApplication[]
@@ -85,6 +86,7 @@ model Job {
   analyticsEvents JobAnalyticsEvent[]
 
   @@index([status, createdAt])
+  @@index([status, deadlineAt])
   @@index([status, featuredUntil, createdAt])
   @@index([category, location, employmentType, workMode])
   @@index([employerId])

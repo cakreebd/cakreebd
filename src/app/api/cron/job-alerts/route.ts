@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { escapeHtml, sendEmail, siteUrl } from "@/lib/email";
+import { expireJobs } from "@/lib/featured-jobs";
 import { prisma } from "@/lib/prisma";
 
 function isAuthorized(request: Request) {
@@ -17,6 +18,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
+  await expireJobs();
   const alerts = await prisma.jobAlert.findMany({
     where: { active: true, user: { emailNotifications: true } },
     include: { user: { select: { email: true } } },

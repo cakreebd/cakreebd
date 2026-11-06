@@ -2404,6 +2404,64 @@ textarea:focus-visible {
   font-size: 12px;
 }
 
+.category-listing-heading {
+  margin-bottom: 14px;
+}
+
+.category-listing-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
+  align-items: start;
+  gap: 22px;
+}
+
+.category-filter-panel {
+  position: sticky;
+  top: 20px;
+  display: block;
+  padding: 18px;
+}
+
+.category-filter-panel h2 {
+  margin: 0 0 15px;
+  color: #293a30;
+  font-size: 17px;
+}
+
+.category-filter-panel form {
+  display: grid;
+  gap: 13px;
+}
+
+.category-filter-panel .filter-submit {
+  width: 100%;
+}
+
+.category-filter-clear {
+  color: #34754c;
+  font-size: 13px;
+  font-weight: 650;
+  text-align: center;
+}
+
+.category-result-card {
+  color: inherit;
+}
+
+.category-result-card h2 {
+  margin: 7px 0 9px;
+  color: #293a30;
+  font-size: 18px;
+}
+
+.category-result-card:hover h2 {
+  color: #28744d;
+}
+
+.category-filter-empty {
+  align-self: start;
+}
+
 .search-results {
   display: grid;
   gap: 11px;
@@ -2499,10 +2557,23 @@ textarea:focus-visible {
   font-size: 13px;
 }
 
+.result-salary-deadline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 5px 16px;
+  margin-top: 3px;
+}
+
 .result-salary small {
   color: #8c978f;
   font-size: 11px;
   font-weight: 400;
+}
+
+.job-deadline {
+  color: #78847c;
+  font-size: 12px;
 }
 
 .result-actions {
@@ -3646,6 +3717,23 @@ textarea:focus-visible {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .category-listing-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .category-filter-panel {
+    position: static;
+  }
+
+  .category-filter-panel form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .category-filter-panel .filter-submit,
+  .category-filter-clear {
+    align-self: end;
+  }
+
   .filter-panel {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -3714,6 +3802,10 @@ textarea:focus-visible {
 
   .filter-panel .filter-search {
     grid-column: auto;
+  }
+
+  .category-filter-panel form {
+    grid-template-columns: 1fr;
   }
 
   .result-card {

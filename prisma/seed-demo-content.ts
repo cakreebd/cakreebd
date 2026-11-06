@@ -2,6 +2,7 @@ import { randomBytes, randomUUID } from "node:crypto";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { DEMO_COMPANY_PREFIX } from "../src/lib/demo-content";
+import { addCalendarMonth } from "../src/lib/job-deadline";
 
 const prisma = new PrismaClient();
 const confirmation = "YES_ADD_DEMO_CONTENT_TO_THIS_DATABASE";
@@ -200,6 +201,7 @@ async function main() {
       });
     }
 
+    const createdAt = new Date();
     const jobData = {
       title: demo.title,
       companyName,
@@ -213,6 +215,8 @@ async function main() {
       requirements: demo.requirements,
       tags: JSON.stringify(demo.tags),
       status: "ACTIVE",
+      createdAt,
+      deadlineAt: addCalendarMonth(createdAt),
     };
     const existingJob = await prisma.job.findFirst({
       where: { employerId: employer.id, title: demo.title },

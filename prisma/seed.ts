@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { addCalendarMonth } from "../src/lib/job-deadline";
 
 const prisma = new PrismaClient();
 
@@ -152,11 +153,14 @@ async function main() {
       select: { id: true },
     });
     if (!exists) {
+      const createdAt = new Date();
       await prisma.job.create({
         data: {
           ...job,
           tags: JSON.stringify(job.tags),
           employerId: employer.id,
+          createdAt,
+          deadlineAt: addCalendarMonth(createdAt),
         },
       });
     }

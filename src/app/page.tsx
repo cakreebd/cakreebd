@@ -3,7 +3,7 @@ import HomeClient, { type Job } from "@/components/home-client";
 import SiteHeader from "@/components/site-header";
 import { getCurrentUser } from "@/lib/auth";
 import { toPublicJob } from "@/lib/jobs";
-import { expireFeaturedJobs } from "@/lib/featured-jobs";
+import { expireJobs } from "@/lib/featured-jobs";
 import { DEMO_COMPANY_PREFIX, isDemoCompany } from "@/lib/demo-content";
 import { JOB_CATEGORIES } from "@/lib/job-categories";
 import { prisma } from "@/lib/prisma";
@@ -16,7 +16,7 @@ export default function HomePage() {
 
 async function HomeContent() {
   const user = await getCurrentUser();
-  await expireFeaturedJobs();
+  await expireJobs();
   const [jobs, saved, activeJobCount, hiringCompanyCount, verifiedCompanyCount, categoryCounts, companies] = await Promise.all([
     prisma.job.findMany({
       where: { status: "ACTIVE" },

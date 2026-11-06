@@ -3,6 +3,7 @@ import { z } from "zod";
 import { currentUserFromRequest } from "@/lib/auth";
 import { notFound, readJson } from "@/lib/http";
 import { isDemoCompany } from "@/lib/demo-content";
+import { expireJobs } from "@/lib/featured-jobs";
 import { prisma } from "@/lib/prisma";
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -12,6 +13,7 @@ const eventSchema = z.object({
 });
 
 export async function POST(request: Request, { params }: RouteContext) {
+  await expireJobs();
   const id = Number((await params).id);
   if (!Number.isInteger(id) || id < 1) return notFound("Job not found.");
 

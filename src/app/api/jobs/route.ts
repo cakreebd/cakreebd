@@ -8,7 +8,8 @@ import {
 } from "@/lib/auth";
 import { badRequest, readJson } from "@/lib/http";
 import { dateDaysAgo, toPublicJob } from "@/lib/jobs";
-import { expireFeaturedJobs } from "@/lib/featured-jobs";
+import { expireJobs } from "@/lib/featured-jobs";
+import { addCalendarMonth } from "@/lib/job-deadline";
 import { EMPLOYER_PLANS, isEmployerPlan, type EmployerPlanKey } from "@/lib/employer-plans";
 import { prisma } from "@/lib/prisma";
 
@@ -28,7 +29,7 @@ const createJobSchema = z.object({
 });
 
 export async function GET(request: Request) {
-  await expireFeaturedJobs();
+  await expireJobs();
   const params = new URL(request.url).searchParams;
   const query = (params.get("q") ?? "").trim().slice(0, 120);
   const location = (params.get("location") ?? "").trim().slice(0, 100);
@@ -134,6 +135,7 @@ export async function POST(request: Request) {
   const user = await currentUserFromRequest(request);
   if (!user) return unauthorizedResponse();
   if (user.role !== "EMPLOYER") return roleRequiredResponse();
+  await expireJobs();
 
   const body = await readJson(request);
   if (body.response) return body.response;
@@ -177,6 +179,7 @@ export async function POST(request: Request) {
     });
   }
   const packageDetails = EMPLOYER_PLANS[effectivePlan];
+  const createdAt = new Date();
   const job = await prisma.$transaction(async (transaction) => {
     const activeJobs = await transaction.job.count({
       where: { employerId: user.id, status: "ACTIVE" },
@@ -192,6 +195,8 @@ export async function POST(request: Request) {
         companyName,
         benefits: jobData.benefits || null,
         featuredUntil: effectivePlan === "GROWTH" ? plan.expiresAt : null,
+        createdAt,
+        deadlineAt: addCalendarMonth(createdAt),
       },
     });
   });

@@ -3,6 +3,7 @@ import {
   currentUserFromRequest,
   unauthorizedResponse,
 } from "@/lib/auth";
+import { expireJobs } from "@/lib/featured-jobs";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(request: Request) {
@@ -11,6 +12,7 @@ export async function GET(request: Request) {
   if (user.role !== "ADMIN") {
     return NextResponse.json({ error: "Administrator access required." }, { status: 403 });
   }
+  await expireJobs();
 
   const [users, jobs, reviews, verifications, counts] = await Promise.all([
     prisma.user.findMany({

@@ -7,6 +7,8 @@ import {
 } from "@/lib/auth";
 import { badRequest, notFound, readJson } from "@/lib/http";
 import { toPublicJob } from "@/lib/jobs";
+import { addCalendarMonth } from "@/lib/job-deadline";
+import { expireJobs } from "@/lib/featured-jobs";
 import { prisma } from "@/lib/prisma";
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -18,6 +20,7 @@ async function getJobId(params: RouteContext["params"]) {
 }
 
 export async function GET(_request: Request, { params }: RouteContext) {
+  await expireJobs();
   const id = await getJobId(params);
   if (!id) return notFound("Job not found.");
   const job = await prisma.job.findFirst({
@@ -36,6 +39,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   const user = await currentUserFromRequest(request);
   if (!user) return unauthorizedResponse();
   if (user.role !== "EMPLOYER") return roleRequiredResponse();
+  await expireJobs();
   const id = await getJobId(params);
   if (!id) return notFound("Job not found.");
 
@@ -44,6 +48,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   const parsed = updateSchema.safeParse(body.data);
   if (!parsed.success) return badRequest("Choose a valid job status.");
 
+  const now = new Date();
   let featuredUntil: Date | null = null;
   if (parsed.data.status === "ACTIVE") {
     const plan = await prisma.employerPlan.findUnique({
@@ -53,7 +58,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
     if (
       plan?.plan === "GROWTH" &&
       plan.expiresAt &&
-      plan.expiresAt > new Date()
+      plan.expiresAt > now
     ) {
       featuredUntil = plan.expiresAt;
     }
@@ -63,6 +68,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
     data: {
       status: parsed.data.status,
       featuredUntil: parsed.data.status === "ACTIVE" ? featuredUntil : null,
+      ...(parsed.data.status === "ACTIVE" ? { deadlineAt: addCalendarMonth(now) } : {}),
     },
   });
   if (result.count === 0) return notFound("Job not found in your employer account.");

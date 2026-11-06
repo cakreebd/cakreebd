@@ -9,7 +9,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { jobLocationFromSlug } from "@/lib/job-locations";
 import { formatSalary, postedLabel } from "@/lib/jobs";
 import { isDemoCompany } from "@/lib/demo-content";
-import { expireFeaturedJobs } from "@/lib/featured-jobs";
+import { expireJobs } from "@/lib/featured-jobs";
 import { prisma } from "@/lib/prisma";
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -22,7 +22,7 @@ async function LocationContent({ params }: PageProps) {
   const [{ slug }, user] = await Promise.all([params, getCurrentUser()]);
   const location = jobLocationFromSlug(slug);
   if (!location) notFound();
-  await expireFeaturedJobs();
+  await expireJobs();
 
   const jobs = await prisma.job.findMany({
     where: {

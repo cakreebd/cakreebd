@@ -5,6 +5,7 @@ import SiteHeader from "@/components/site-header";
 import { getCurrentUser } from "@/lib/auth";
 import { EMPLOYER_PLANS, isEmployerPlan, type EmployerPlanKey } from "@/lib/employer-plans";
 import { isBkashConfigured } from "@/lib/bkash";
+import { expireJobs } from "@/lib/featured-jobs";
 import { isDemoCompany } from "@/lib/demo-content";
 import type { EmployerJobAnalytics } from "@/lib/employer-analytics";
 import { toPublicJob } from "@/lib/jobs";
@@ -26,6 +27,7 @@ async function DashboardContent({ section }: { section: string }) {
     ? ["overview", "applications", "saved", "alerts", "profile", "cv", "notifications"]
     : ["overview", "post-job", "jobs", "applicants", "analytics", "candidates", "company", "verification", "plan", "notifications"];
   if (!allowedSections.includes(section)) redirect("/dashboard");
+  await expireJobs();
 
   if (user.role === "JOB_SEEKER") {
     const profile = await prisma.user.findUniqueOrThrow({

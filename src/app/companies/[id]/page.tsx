@@ -7,7 +7,7 @@ import FeaturedBadge from "@/components/featured-badge";
 import DemoBadge from "@/components/demo-badge";
 import { getCurrentUser } from "@/lib/auth";
 import { formatSalary, parseTags } from "@/lib/jobs";
-import { expireFeaturedJobs } from "@/lib/featured-jobs";
+import { expireJobs } from "@/lib/featured-jobs";
 import { prisma } from "@/lib/prisma";
 import { isDemoCompany } from "@/lib/demo-content";
 
@@ -20,7 +20,7 @@ export default function CompanyPage({ params }: PageProps) {
 async function CompanyContent({ params }: PageProps) {
   const { id } = await params;
   const user = await getCurrentUser();
-  await expireFeaturedJobs();
+  await expireJobs();
   const company = await prisma.user.findFirst({
     where: { id, role: "EMPLOYER", companyName: { not: null } },
     select: {
