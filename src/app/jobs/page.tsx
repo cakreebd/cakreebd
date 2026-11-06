@@ -7,7 +7,7 @@ import VerifiedBadge from "@/components/verified-badge";
 import FeaturedBadge from "@/components/featured-badge";
 import DemoBadge from "@/components/demo-badge";
 import { getCurrentUser } from "@/lib/auth";
-import { dateDaysAgo, formatSalary, postedLabel } from "@/lib/jobs";
+import { dateDaysAgo, findJobsBySalaryAscending, formatSalary, postedLabel } from "@/lib/jobs";
 import { isDemoCompany } from "@/lib/demo-content";
 import { expireJobs } from "@/lib/featured-jobs";
 import { prisma } from "@/lib/prisma";
@@ -87,38 +87,32 @@ async function JobsContent({ searchParams }: PageProps) {
     ...(minSalary ? { salaryMax: { gte: minSalary } } : {}),
     ...(maxSalary ? { salaryMin: { lte: maxSalary } } : {}),
     ...(postedAfter ? { createdAt: { gte: postedAfter } } : {}),
+    ...(salaryRangeInvalid ? { id: { in: [] } } : {}),
   };
   const [jobs, total, saved] = await Promise.all([
-    salaryRangeInvalid ? Promise.resolve([]) : prisma.job.findMany({
-      where,
-      orderBy: sort === "salary-high"
-        ? [
-            { featuredUntil: { sort: "desc", nulls: "last" } },
-            { salaryMax: { sort: "desc", nulls: "last" } },
-            { createdAt: "desc" },
-          ]
-        : sort === "salary-low"
-          ? [
-              { featuredUntil: { sort: "desc", nulls: "last" } },
-              { salaryMin: { sort: "asc", nulls: "last" } },
-              { createdAt: "desc" },
-            ]
-          : [
-              { featuredUntil: { sort: "desc", nulls: "last" } },
-              { createdAt: "desc" },
-            ],
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-      include: {
-        employer: {
-          select: {
-            companyName: true,
-            companyVerification: { select: { status: true } },
+    sort === "salary-low"
+      ? findJobsBySalaryAscending(where, (page - 1) * pageSize, pageSize)
+      : prisma.job.findMany({
+          where,
+          orderBy: sort === "salary-high"
+            ? [
+                { featuredUntil: "desc" },
+                { salaryMax: "desc" },
+                { createdAt: "desc" },
+              ]
+            : [{ featuredUntil: "desc" }, { createdAt: "desc" }],
+          skip: (page - 1) * pageSize,
+          take: pageSize,
+          include: {
+            employer: {
+              select: {
+                companyName: true,
+                companyVerification: { select: { status: true } },
+              },
+            },
           },
-        },
-      },
-    }),
-    salaryRangeInvalid ? Promise.resolve(0) : prisma.job.count({ where }),
+        }),
+    prisma.job.count({ where }),
     user?.role === "JOB_SEEKER"
       ? prisma.savedJob.findMany({ where: { userId: user.id }, select: { jobId: true } })
       : Promise.resolve([]),

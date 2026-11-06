@@ -1,5 +1,22 @@
-import type { Job } from "@prisma/client";
+import type { Job, Prisma } from "@prisma/client";
 import { isJobFeatured } from "@/lib/featured-jobs";
+import { prisma } from "@/lib/prisma";
+
+const jobListingInclude = {
+  employer: {
+    select: {
+      companyName: true,
+      companyVerification: { select: { status: true } },
+    },
+  },
+} satisfies Prisma.JobInclude;
+
+type JobListing = Prisma.JobGetPayload<{ include: typeof jobListingInclude }>;
+
+type SalarySortBucket = {
+  where: Prisma.JobWhereInput;
+  orderBy: Prisma.JobOrderByWithRelationInput[];
+};
 
 export function parseTags(tags: string): string[] {
   try {
@@ -23,6 +40,73 @@ export function formatSalary(min: number | null, max: number | null) {
 
 export function dateDaysAgo(days: number) {
   return new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+}
+
+export function isValidJobId(value: string) {
+  return /^[a-z0-9]{1,64}$/i.test(value);
+}
+
+export async function findJobsBySalaryAscending(
+  where: Prisma.JobWhereInput,
+  skip: number,
+  take: number,
+): Promise<JobListing[]> {
+  const now = new Date();
+  const featured = { featuredUntil: { gt: now } };
+  const notFeatured = {
+    OR: [{ featuredUntil: null }, { featuredUntil: { lte: now } }],
+  };
+  const buckets: SalarySortBucket[] = [
+    {
+      where: { AND: [where, featured, { salaryMin: { not: null } }] },
+      orderBy: [
+        { featuredUntil: "desc" },
+        { salaryMin: "asc" },
+        { createdAt: "desc" },
+      ],
+    },
+    {
+      where: { AND: [where, featured, { salaryMin: null }] },
+      orderBy: [{ featuredUntil: "desc" }, { createdAt: "desc" }],
+    },
+    {
+      where: { AND: [where, notFeatured, { salaryMin: { not: null } }] },
+      orderBy: [{ salaryMin: "asc" }, { createdAt: "desc" }],
+    },
+    {
+      where: { AND: [where, notFeatured, { salaryMin: null }] },
+      orderBy: [{ createdAt: "desc" }],
+    },
+  ];
+  const counts = await Promise.all(
+    buckets.map(({ where: bucketWhere }) => prisma.job.count({ where: bucketWhere })),
+  );
+  const jobs: JobListing[] = [];
+  let remainingSkip = skip;
+  let remainingTake = take;
+
+  for (const [index, bucket] of buckets.entries()) {
+    if (remainingSkip >= counts[index]) {
+      remainingSkip -= counts[index];
+      continue;
+    }
+
+    const bucketSkip = remainingSkip;
+    remainingSkip = 0;
+    const bucketTake = Math.min(remainingTake, counts[index] - bucketSkip);
+    const batch = await prisma.job.findMany({
+      where: bucket.where,
+      orderBy: bucket.orderBy,
+      skip: bucketSkip,
+      take: bucketTake,
+      include: jobListingInclude,
+    });
+    jobs.push(...batch);
+    remainingTake -= batch.length;
+    if (remainingTake === 0) break;
+  }
+
+  return jobs;
 }
 
 export function postedLabel(date: Date) {

@@ -44,15 +44,29 @@ export async function GET(request: Request) {
   };
   const candidates = await prisma.user.findMany({
     where,
-    select: { id: true, name: true, location: true, headline: true, bio: true, skills: true },
+    select: {
+      id: true,
+      name: true,
+      profilePictureStorageKey: true,
+      location: true,
+      headline: true,
+      bio: true,
+      skills: true,
+    },
     orderBy: { updatedAt: "desc" },
     take: 40,
   });
 
   return NextResponse.json({
-    candidates: candidates.map((candidate) => ({
-      ...candidate,
-      skills: parseSkills(candidate.skills),
-    })),
+    candidates: candidates.map((candidate) => {
+      const { profilePictureStorageKey, ...publicProfile } = candidate;
+      return {
+        ...publicProfile,
+        profilePictureUrl: profilePictureStorageKey
+          ? `/api/candidates/${candidate.id}/picture`
+          : null,
+        skills: parseSkills(candidate.skills),
+      };
+    }),
   });
 }

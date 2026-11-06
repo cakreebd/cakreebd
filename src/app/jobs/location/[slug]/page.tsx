@@ -32,7 +32,7 @@ async function LocationContent({ params }: PageProps) {
         : { location: { contains: location.name } }),
     },
     orderBy: [
-      { featuredUntil: { sort: "desc", nulls: "last" } },
+      { featuredUntil: "desc" },
       { createdAt: "desc" },
     ],
     take: 100,

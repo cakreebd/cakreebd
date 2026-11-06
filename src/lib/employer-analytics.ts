@@ -1,5 +1,5 @@
 export type EmployerJobAnalytics = {
-  id: number;
+  id: string;
   title: string;
   status: string;
   views: number;

@@ -6,7 +6,7 @@ import {
   unauthorizedResponse,
 } from "@/lib/auth";
 import { badRequest, notFound, readJson } from "@/lib/http";
-import { toPublicJob } from "@/lib/jobs";
+import { isValidJobId, toPublicJob } from "@/lib/jobs";
 import { addCalendarMonth } from "@/lib/job-deadline";
 import { expireJobs } from "@/lib/featured-jobs";
 import { prisma } from "@/lib/prisma";
@@ -15,14 +15,13 @@ type RouteContext = { params: Promise<{ id: string }> };
 
 async function getJobId(params: RouteContext["params"]) {
   const { id } = await params;
-  const jobId = Number(id);
-  return Number.isInteger(jobId) && jobId > 0 ? jobId : null;
+  return isValidJobId(id) ? id : null;
 }
 
 export async function GET(_request: Request, { params }: RouteContext) {
   await expireJobs();
   const id = await getJobId(params);
-  if (!id) return notFound("Job not found.");
+  if (id === null) return notFound("Job not found.");
   const job = await prisma.job.findFirst({
     where: { id, status: "ACTIVE" },
     include: { employer: { select: { companyBio: true, website: true } } },
@@ -41,7 +40,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   if (user.role !== "EMPLOYER") return roleRequiredResponse();
   await expireJobs();
   const id = await getJobId(params);
-  if (!id) return notFound("Job not found.");
+  if (id === null) return notFound("Job not found.");
 
   const body = await readJson(request);
   if (body.response) return body.response;
@@ -81,7 +80,7 @@ export async function DELETE(request: Request, { params }: RouteContext) {
   if (!user) return unauthorizedResponse();
   if (user.role !== "EMPLOYER") return roleRequiredResponse();
   const id = await getJobId(params);
-  if (!id) return notFound("Job not found.");
+  if (id === null) return notFound("Job not found.");
 
   const result = await prisma.job.deleteMany({
     where: { id, employerId: user.id },

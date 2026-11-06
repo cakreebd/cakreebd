@@ -10,7 +10,7 @@ export default function ApplyButton({
   signedIn,
   isJobSeeker,
 }: {
-  jobId: number;
+  jobId: string;
   alreadyApplied: boolean;
   signedIn: boolean;
   isJobSeeker: boolean;

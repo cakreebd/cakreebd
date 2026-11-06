@@ -162,6 +162,40 @@ textarea:focus-visible {
   font-weight: 650;
 }
 
+.header-profile-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.profile-avatar {
+  display: inline-grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  overflow: hidden;
+  color: #276343;
+  background: #e9f4ed;
+  border: 1px solid #d9e8dc;
+  border-radius: 50%;
+  font-size: 16px;
+  font-weight: 700;
+  place-items: center;
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.header-profile-avatar {
+  width: 34px;
+  height: 34px;
+  flex-basis: 34px;
+  font-size: 14px;
+}
+
 .button {
   display: inline-flex;
   align-items: center;
@@ -2332,6 +2366,64 @@ textarea:focus-visible {
   border: 1px solid #cee4d2;
 }
 
+.profile-picture-editor {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  padding: 16px;
+  margin-bottom: 18px;
+  background: #f8faf8;
+  border: 1px solid #e8eee9;
+  border-radius: 9px;
+}
+
+.profile-avatar-editor {
+  width: 76px;
+  height: 76px;
+  flex-basis: 76px;
+  font-size: 27px;
+}
+
+.profile-picture-controls {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+}
+
+.profile-picture-controls > p {
+  margin: 0;
+  color: #78847c;
+  font-size: 13px;
+}
+
+.profile-picture-upload {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.profile-picture-upload .upload-field {
+  display: block;
+}
+
+.profile-picture-upload input {
+  max-width: 240px;
+  font-size: 12px;
+}
+
+.profile-picture-upload .button {
+  min-height: 38px;
+  padding: 0 13px;
+  font-size: 13px;
+}
+
+.profile-picture-controls .form-error,
+.profile-picture-controls .form-success {
+  padding: 6px 9px;
+  margin: 0;
+}
+
 .page-shell,
 .dashboard-shell {
   width: min(1172px, calc(100% - 48px));
@@ -3660,7 +3752,30 @@ textarea:focus-visible {
   min-width: 0;
 }
 
-.applicant-row > div > strong {
+.applicant-profile {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  flex: 1;
+}
+
+.applicant-profile-avatar,
+.candidate-result-avatar {
+  width: 38px;
+  height: 38px;
+  flex-basis: 38px;
+}
+
+.candidate-result-avatar {
+  margin-right: 12px;
+}
+
+.applicant-profile > div {
+  min-width: 0;
+}
+
+.applicant-profile > div > strong {
   color: #34473a;
   font-size: 13px;
 }
@@ -3770,6 +3885,27 @@ textarea:focus-visible {
 }
 
 @media (max-width: 600px) {
+  .profile-picture-editor {
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .profile-avatar-editor {
+    width: 58px;
+    height: 58px;
+    flex-basis: 58px;
+  }
+
+  .profile-picture-upload {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .profile-picture-upload input {
+    max-width: 100%;
+  }
+
   .auth-page {
     min-height: calc(100vh - 66px);
     padding: 25px 14px;

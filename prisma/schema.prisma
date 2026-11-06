@@ -3,13 +3,12 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
-  directUrl = env("DATABASE_URL")
 }
 
 model User {
-  id           String   @id @default(cuid())
+  id           String   @id @default(cuid()) @map("_id")
   name         String
   email        String   @unique
   passwordHash String
@@ -19,6 +18,7 @@ model User {
   headline     String?
   bio          String?
   skills       String   @default("[]")
+  profilePictureStorageKey String?
   cvFileName   String?
   cvStorageKey String?
   companyName  String?
@@ -49,7 +49,7 @@ model User {
 }
 
 model Session {
-  id        String   @id @default(cuid())
+  id        String   @id @default(cuid()) @map("_id")
   tokenHash String   @unique
   userId    String
   expiresAt DateTime
@@ -61,7 +61,7 @@ model Session {
 }
 
 model Job {
-  id             Int      @id @default(autoincrement())
+  id             String   @id @default(cuid()) @map("_id")
   employerId     String
   title          String
   companyName    String
@@ -93,8 +93,8 @@ model Job {
 }
 
 model JobAnalyticsEvent {
-  id        String   @id @default(cuid())
-  jobId     Int
+  id        String   @id @default(cuid()) @map("_id")
+  jobId     String
   eventType String
   createdAt DateTime @default(now())
   job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
@@ -103,8 +103,8 @@ model JobAnalyticsEvent {
 }
 
 model JobApplication {
-  id          String   @id @default(cuid())
-  jobId       Int
+  id          String   @id @default(cuid()) @map("_id")
+  jobId       String
   applicantId String
   coverLetter String?
   status      String   @default("SUBMITTED")
@@ -121,7 +121,7 @@ model JobApplication {
 }
 
 model JobAlert {
-  id          String   @id @default(cuid())
+  id          String   @id @default(cuid()) @map("_id")
   userId      String
   name        String
   query       String?
@@ -138,7 +138,7 @@ model JobAlert {
 }
 
 model Notification {
-  id        String   @id @default(cuid())
+  id        String   @id @default(cuid()) @map("_id")
   userId    String
   title     String
   message   String
@@ -151,7 +151,7 @@ model Notification {
 }
 
 model Interview {
-  id              String   @id @default(cuid())
+  id              String   @id @default(cuid()) @map("_id")
   applicationId   String
   employerId      String
   scheduledAt     DateTime
@@ -169,7 +169,7 @@ model Interview {
 }
 
 model EmployerPlan {
-  id        String   @id @default(cuid())
+  id        String   @id @default(cuid()) @map("_id")
   userId    String   @unique
   plan      String   @default("FREE")
   expiresAt DateTime?
@@ -178,7 +178,7 @@ model EmployerPlan {
 }
 
 model CompanyVerification {
-  id                     String   @id @default(cuid())
+  id                     String   @id @default(cuid()) @map("_id")
   employerId             String   @unique
   legalCompanyName       String
   registrationAuthority  String
@@ -196,7 +196,7 @@ model CompanyVerification {
 }
 
 model CandidateResume {
-  id        String   @id @default(cuid())
+  id        String   @id @default(cuid()) @map("_id")
   userId    String   @unique
   summary   String   @default("")
   targetRole String  @default("")
@@ -206,7 +206,7 @@ model CandidateResume {
 }
 
 model ResumeSection {
-  id          String   @id @default(cuid())
+  id          String   @id @default(cuid()) @map("_id")
   resumeId    String
   kind        String
   title       String
@@ -221,7 +221,7 @@ model ResumeSection {
 }
 
 model CompanyReview {
-  id             String   @id @default(cuid())
+  id             String   @id @default(cuid()) @map("_id")
   applicationId  String   @unique
   authorId       String
   employerId     String
@@ -243,7 +243,7 @@ model CompanyReview {
 }
 
 model EmployerPayment {
-  id                   String   @id @default(cuid())
+  id                   String   @id @default(cuid()) @map("_id")
   userId               String
   plan                 String
   amountBdt            Int
@@ -264,7 +264,7 @@ model EmployerPayment {
 }
 
 model PaymentProviderToken {
-  id             String   @id @default("bkash")
+  id             String   @id @default("bkash") @map("_id")
   accessToken    String
   refreshToken   String
   expiresAt      DateTime
@@ -272,8 +272,8 @@ model PaymentProviderToken {
 }
 
 model SavedJob {
-  id        String   @id @default(cuid())
-  jobId     Int
+  id        String   @id @default(cuid()) @map("_id")
+  jobId     String
   userId    String
   createdAt DateTime @default(now())
   job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)

@@ -12,6 +12,7 @@ export type SessionUser = {
   email: string;
   role: "JOB_SEEKER" | "EMPLOYER" | "ADMIN";
   companyName: string | null;
+  profilePictureUrl: string | null;
 };
 
 export function publicUser(user: {
@@ -20,6 +21,7 @@ export function publicUser(user: {
   email: string;
   role: string;
   companyName: string | null;
+  profilePictureStorageKey?: string | null;
 }): SessionUser {
   let role: SessionUser["role"];
   switch (user.role) {
@@ -37,6 +39,7 @@ export function publicUser(user: {
     email: user.email,
     role,
     companyName: user.companyName,
+    profilePictureUrl: user.profilePictureStorageKey ? "/api/profile/picture" : null,
   };
 }
 

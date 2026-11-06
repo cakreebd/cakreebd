@@ -35,6 +35,15 @@ function parseSkills(value: string) {
   return parsed.filter((skill): skill is string => typeof skill === "string");
 }
 
+function serializeProfile<T extends { skills: string; profilePictureStorageKey: string | null }>(profile: T) {
+  const { skills, profilePictureStorageKey, ...fields } = profile;
+  return {
+    ...fields,
+    skills: parseSkills(skills),
+    profilePictureUrl: profilePictureStorageKey ? "/api/profile/picture" : null,
+  };
+}
+
 export async function GET(request: Request) {
   const user = await currentUserFromRequest(request);
   if (!user) return unauthorizedResponse();
@@ -45,6 +54,7 @@ export async function GET(request: Request) {
       name: true,
       email: true,
       role: true,
+      profilePictureStorageKey: true,
       phone: true,
       location: true,
       headline: true,
@@ -58,7 +68,7 @@ export async function GET(request: Request) {
       emailNotifications: true,
     },
   });
-  return NextResponse.json({ profile: { ...profile, skills: parseSkills(profile.skills) } });
+  return NextResponse.json({ profile: serializeProfile(profile) });
 }
 
 export async function PATCH(request: Request) {
@@ -127,6 +137,7 @@ export async function PATCH(request: Request) {
         name: true,
         email: true,
         role: true,
+        profilePictureStorageKey: true,
         phone: true,
         location: true,
         headline: true,
@@ -158,5 +169,5 @@ export async function PATCH(request: Request) {
     }
     return updatedProfile;
   });
-  return NextResponse.json({ profile: { ...profile, skills: parseSkills(profile.skills) } });
+  return NextResponse.json({ profile: serializeProfile(profile) });
 }

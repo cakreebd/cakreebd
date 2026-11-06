@@ -37,7 +37,7 @@ async function CompanyContent({ params }: PageProps) {
     prisma.job.findMany({
       where: { employerId: company.id, companyName: company.companyName, status: "ACTIVE" },
       orderBy: [
-        { featuredUntil: { sort: "desc", nulls: "last" } },
+        { featuredUntil: "desc" },
         { createdAt: "desc" },
       ],
       select: {

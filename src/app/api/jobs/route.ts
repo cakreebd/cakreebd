@@ -7,7 +7,7 @@ import {
   unauthorizedResponse,
 } from "@/lib/auth";
 import { badRequest, readJson } from "@/lib/http";
-import { dateDaysAgo, toPublicJob } from "@/lib/jobs";
+import { dateDaysAgo, findJobsBySalaryAscending, toPublicJob } from "@/lib/jobs";
 import { expireJobs } from "@/lib/featured-jobs";
 import { addCalendarMonth } from "@/lib/job-deadline";
 import { EMPLOYER_PLANS, isEmployerPlan, type EmployerPlanKey } from "@/lib/employer-plans";
@@ -89,35 +89,28 @@ export async function GET(request: Request) {
   };
 
   const [jobs, total] = await Promise.all([
-    prisma.job.findMany({
-      where,
-      orderBy: sort === "salary-high"
-        ? [
-            { featuredUntil: { sort: "desc", nulls: "last" } },
-            { salaryMax: { sort: "desc", nulls: "last" } },
-            { createdAt: "desc" },
-          ]
-        : sort === "salary-low"
-          ? [
-              { featuredUntil: { sort: "desc", nulls: "last" } },
-              { salaryMin: { sort: "asc", nulls: "last" } },
-              { createdAt: "desc" },
-            ]
-          : [
-              { featuredUntil: { sort: "desc", nulls: "last" } },
-              { createdAt: "desc" },
-            ],
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-      include: {
-        employer: {
-          select: {
-            companyName: true,
-            companyVerification: { select: { status: true } },
+    sort === "salary-low"
+      ? findJobsBySalaryAscending(where, (page - 1) * pageSize, pageSize)
+      : prisma.job.findMany({
+          where,
+          orderBy: sort === "salary-high"
+            ? [
+                { featuredUntil: "desc" },
+                { salaryMax: "desc" },
+                { createdAt: "desc" },
+              ]
+            : [{ featuredUntil: "desc" }, { createdAt: "desc" }],
+          skip: (page - 1) * pageSize,
+          take: pageSize,
+          include: {
+            employer: {
+              select: {
+                companyName: true,
+                companyVerification: { select: { status: true } },
+              },
+            },
           },
-        },
-      },
-    }),
+        }),
     prisma.job.count({ where }),
   ]);
 

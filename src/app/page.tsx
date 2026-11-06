@@ -21,7 +21,7 @@ async function HomeContent() {
     prisma.job.findMany({
       where: { status: "ACTIVE" },
       orderBy: [
-        { featuredUntil: { sort: "desc", nulls: "last" } },
+        { featuredUntil: "desc" },
         { createdAt: "desc" },
       ],
       take: 8,

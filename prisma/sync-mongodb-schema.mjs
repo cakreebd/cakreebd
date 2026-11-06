@@ -3,7 +3,7 @@ import { join } from "node:path";
 
 if (process.env.VERCEL === "1" && process.env.VERCEL_ENV === "production") {
   const prismaCli = join(process.cwd(), "node_modules", "prisma", "build", "index.js");
-  const result = spawnSync(process.execPath, [prismaCli, "migrate", "deploy"], {
+  const result = spawnSync(process.execPath, [prismaCli, "db", "push", "--skip-generate"], {
     stdio: "inherit",
   });
 

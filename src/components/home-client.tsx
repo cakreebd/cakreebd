@@ -11,7 +11,7 @@ import { JOB_CATEGORIES, jobCategorySlug } from "@/lib/job-categories";
 import { JOB_LOCATIONS } from "@/lib/job-locations";
 
 export type Job = {
-  id: number;
+  id: string;
   title: string;
   company: string;
   companyVerified?: boolean;
@@ -157,7 +157,7 @@ export default function HomeClient({
   companies,
 }: {
   initialJobs: Job[];
-  initiallySavedJobIds: number[];
+  initiallySavedJobIds: string[];
   stats: HomeStats;
   categoryCounts: Record<string, number>;
   companies: HomepageCompany[];
@@ -171,7 +171,7 @@ export default function HomeClient({
     location: "All locations",
     category: "All categories",
   });
-  const [savedJobs, setSavedJobs] = useState<number[]>(initiallySavedJobIds);
+  const [savedJobs, setSavedJobs] = useState<string[]>(initiallySavedJobIds);
   const [saveError, setSaveError] = useState("");
 
   const filteredJobs = useMemo(() => {
@@ -202,7 +202,7 @@ export default function HomeClient({
     router.push(`/jobs${params.size ? `?${params.toString()}` : ""}`);
   }
 
-  async function toggleSavedJob(jobId: number) {
+  async function toggleSavedJob(jobId: string) {
     setSaveError("");
     const isSaved = savedJobs.includes(jobId);
     try {
@@ -244,12 +244,11 @@ export default function HomeClient({
         <div className="hero-orb hero-orb-two" />
         <div className="hero-content">
           <div className="hero-copy">
-            <div className="eyebrow"><span className="eyebrow-dot" /> YOUR NEXT CHAPTER STARTS HERE</div>
-            <h1 id="hero-title">Find Job that<br />moves you <span>forward.</span></h1>
+            <div className="eyebrow"><span className="eyebrow-dot" /> FIND YOUR NEXT OPPORTUNITY</div>
+            <h1 id="hero-title">Find work that<br />moves you <span>forward.</span></h1>
             <p className="hero-description">
-              Discover meaningful opportunities from teams across Bangladesh. Your next big thing is closer than you think.
+              Explore jobs from employers across Bangladesh and find the role that fits your skills, goals, and life.
             </p>
-            <div className="hero-proof"><span><strong>{stats.activeJobs.toLocaleString("en-BD")}</strong> active opportunities across Bangladesh</span></div>
           </div>
 
           <form className="search-panel" onSubmit={handleSearch}>
@@ -356,9 +355,9 @@ export default function HomeClient({
       <section aria-labelledby="jobs-title" className="section jobs-section" id="jobs">
         <div className="section-heading jobs-heading">
           <div>
-            <p className="section-kicker">HANDPICKED FOR YOU</p>
-            <h2 id="jobs-title">A few good opportunities</h2>
-            <p className="jobs-subtitle">{filteredJobs.length} roles to explore from teams doing great work.</p>
+            <p className="section-kicker">THE LATEST OPENINGS</p>
+            <h2 id="jobs-title">Find your next opportunity</h2>
+            <p className="jobs-subtitle">{filteredJobs.length} {filteredJobs.length === 1 ? "role" : "roles"} to explore from employers across Bangladesh.</p>
           </div>
           <Link className="text-link" href="/jobs">Browse all jobs <Icon className="h-4 w-4" name="arrow" /></Link>
         </div>
@@ -469,10 +468,10 @@ export default function HomeClient({
       <footer className="site-footer">
         <div className="footer-top">
           <div>
-            <a aria-label="Cakree home" className="brand footer-brand" href="#">
+            <Link aria-label="Cakree home" className="brand footer-brand" href="/">
               <span className="brand-mark"><Icon className="h-[21px] w-[21px]" name="briefcase" /></span>
               <span>Cakree<span className="brand-period">.</span></span>
-            </a>
+            </Link>
             <p>Good work changes everything.<br />Let&apos;s find yours.</p>
           </div>
           <div className="footer-links">
@@ -481,7 +480,7 @@ export default function HomeClient({
             <div><strong>Say hello</strong><a href="mailto:hello@cakree.com">Contact us</a><a href="mailto:hello@cakree.com?subject=Support">Help &amp; support</a></div>
           </div>
         </div>
-        <div className="footer-bottom"><span>© 2025 Cakree. Made with care in Bangladesh.</span><span>Dhaka · Bangladesh</span></div>
+        <div className="footer-bottom"><span>© 2026 Cakree. Made with care in Bangladesh.</span><span>Dhaka · Bangladesh</span></div>
       </footer>
 
     </main>

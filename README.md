@@ -1,22 +1,22 @@
 # Cakree
 
-Cakree is a Bangladesh-focused job portal built with Next.js, TypeScript, Prisma, and PostgreSQL. Job seekers can create profiles, upload a CV, save roles, and apply. Employers can create a company profile, publish or close openings, review applications, schedule interviews, and update candidate statuses.
+Cakree is a Bangladesh-focused job portal built with Next.js, TypeScript, Prisma, and MongoDB. Job seekers can create profiles, upload a CV, save roles, and apply. Employers can create a company profile, publish or close openings, review applications, schedule interviews, and update candidate statuses.
 
 ## Run locally
 
-Use Node.js 22.13 or later and create a PostgreSQL database (for example, the Prisma Postgres store connected to the Vercel project). Add its connection URL to `.env`, then install dependencies and initialize the database:
+Use Node.js 22.13 or later and create a MongoDB database in Atlas, or a local MongoDB replica set. Add its connection URL to `.env`, then install dependencies and initialize the database:
 
 ```bash
 npm install
 Copy-Item .env.example .env
-npm run db:migrate
+npm run db:push
 npm run db:seed
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
-`DATABASE_URL` is used by the application and Prisma Migrate.
+`DATABASE_URL` is the MongoDB connection string used by Prisma. MongoDB must support transactions; Atlas replica sets are ready by default. Local MongoDB must be configured as a replica set.
 
 On macOS or Linux, copy `.env.example` to `.env` with `cp .env.example .env`.
 
@@ -33,12 +33,12 @@ Use a separate job-seeker account to try candidate profiles, saved jobs, CV uplo
 
 - Account registration and sign-in for job seekers and employers
 - Database-backed sessions using secure, HTTP-only cookies
-- Candidate profile, skills, preferred location, and private CV upload (PDF/DOCX, maximum 5 MB; local files in development, private Vercel Blob in deployments)
+- Candidate profile, skills, preferred location, profile picture (JPEG/PNG/WebP, maximum 3 MB), and private CV upload (PDF/DOCX, maximum 5 MB; local files in development, private Vercel Blob in deployments)
 - Persistent saved jobs and job applications with optional cover letters
 - Employer company profile, job posting, job status management, and application review
 - Job postings automatically close one calendar month after publishing; employers can reopen a listing for another month
 - Public company pages with active openings
-- Candidate directory search for job seekers who explicitly opt in; email and CV remain private
+- Candidate directory search for job seekers who explicitly opt in; profile pictures are shown to opted-in employers and employers the candidate applies to, while email and CV remain private
 - Interview scheduling with in-app candidate and employer notifications
 - Saved job alerts with matching jobs shown in the candidate dashboard
 - Employer job-posting packages with active-job limits and featured listing placement on Growth
@@ -58,25 +58,25 @@ Use a separate job-seeker account to try candidate profiles, saved jobs, CV uplo
 
 - `npm run dev` — start the development server
 - `npm run lint` — run ESLint
-- `npm run build` — generate Prisma Client, deploy committed migrations on Vercel Production, and create a production build
-- `npm run db:migrate` — create/apply a PostgreSQL development migration
-- `npm run db:deploy` — apply committed migrations to a production database
+- `npm run build` — generate Prisma Client, sync the schema on Vercel Production, and create a production build
+- `npm run db:push` — sync the Prisma schema to the configured MongoDB database
+- `npm run db:deploy` — sync the Prisma schema to the configured deployment database
 - `npm run db:seed` — add sample jobs and the local demo employer
 - `npm run db:seed-demo` — add or refresh clearly labeled fictional preview listings across varied roles and employment types in the configured database; requires `CAKREE_DEMO_SEED_CONFIRMATION=YES_ADD_DEMO_CONTENT_TO_THIS_DATABASE`
 - `npm run db:create-admin` — create or reset a protected administrator account using environment variables
 - `npm run db:promote-admin -- cakreebd@gmail.com` — grant admin access to that existing account without changing its password
 
-The application now uses PostgreSQL. Existing local SQLite data is not migrated automatically; the SQLite database file is left untouched, but it cannot be used by this PostgreSQL configuration. CV files use the local filesystem in development unless `BLOB_READ_WRITE_TOKEN` or `BLOB_STORE_ID` is configured. Production uses private Vercel Blob storage and requires a private Blob store connected to the Vercel project. Local database files and uploaded files are excluded from source control.
+The application uses MongoDB with Prisma `db push`; Prisma Migrate and SQL migrations are not used. Existing PostgreSQL data is not copied automatically. Point `DATABASE_URL` at the intended MongoDB database before running `db:push` or any seed command. CV and profile-picture files use the local filesystem in development unless `BLOB_READ_WRITE_TOKEN` or `BLOB_STORE_ID` is configured. Production uses private Vercel Blob storage and requires a private Blob store connected to the Vercel project. Local database files and uploaded files are excluded from source control.
 
 ## Deploy to Vercel
 
-1. Connect a PostgreSQL database to the Vercel project and create a **private** Vercel Blob store.
+1. Create a MongoDB Atlas database and a **private** Vercel Blob store.
 2. Import this GitHub repository into Vercel.
-3. Confirm the database integration provides `DATABASE_URL` for Production. Configure `SITE_URL` and the existing integration environment variables in Vercel. Keep all secrets server-side.
+3. Configure `DATABASE_URL` with the MongoDB Atlas connection string for Production. Configure `SITE_URL` and the existing integration environment variables in Vercel. Keep all secrets server-side.
 4. Connect the private Blob store to the Vercel project and enable it for Production, Preview, and Development as needed. Vercel supplies Blob access to connected deployments; local runs may use `BLOB_READ_WRITE_TOKEN`.
-5. Deploy the app. On Vercel Production builds, the build command automatically applies pending migrations with `prisma migrate deploy` before building the app. Preview builds do not run production migrations. Do not run `db:seed` in production. The separately gated `db:seed-demo` command creates fictional employers and sample jobs in the database selected by `DATABASE_URL`; demo jobs are marked and cannot accept applications.
+5. Deploy the app. On Vercel Production builds, the build command synchronizes the Prisma schema with `prisma db push` before building the app. Preview builds do not change the database schema. Do not run `db:seed` in production. The separately gated `db:seed-demo` command creates fictional employers and sample jobs in the database selected by `DATABASE_URL`; demo jobs are marked and cannot accept applications.
 
-Preview deployments should use a separate PostgreSQL database/branch from production. The first PostgreSQL migration is a fresh baseline; it does not import data from the previous local SQLite database.
+Preview deployments should use a separate MongoDB database from production. The first MongoDB schema push creates the collections and indexes; it does not import data from the previous PostgreSQL or local SQLite databases.
 
 Employer package prices are shown in Bangladeshi taka. Paid package entitlements are granted only after bKash payment verification; checkout requires merchant credentials and a public HTTPS callback URL.
 

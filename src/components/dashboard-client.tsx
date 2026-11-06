@@ -8,10 +8,12 @@ import VerifiedBadge from "@/components/verified-badge";
 import FeaturedBadge from "@/components/featured-badge";
 import DemoBadge from "@/components/demo-badge";
 import DashboardSidebar from "@/components/dashboard-sidebar";
+import ProfileAvatar from "@/components/profile-avatar";
+import ProfilePictureEditor from "@/components/profile-picture-editor";
 import type { EmployerJobAnalytics } from "@/lib/employer-analytics";
 
 type BasicJob = {
-  id: number;
+  id: string;
   title: string;
   companyName: string;
   location: string;
@@ -23,6 +25,7 @@ type BasicJob = {
 type CandidateProfile = {
   name: string;
   email: string;
+  profilePictureUrl: string | null;
   phone: string | null;
   location: string | null;
   headline: string | null;
@@ -37,6 +40,7 @@ type EmployerProfile = {
   id: string;
   name: string;
   email: string;
+  profilePictureUrl: string | null;
   phone: string | null;
   companyName: string | null;
   companyBio: string | null;
@@ -76,7 +80,7 @@ type JobAlert = {
   location: string | null;
   category: string | null;
   minSalary: number | null;
-  matches: { id: number; title: string; companyName: string; location: string }[];
+  matches: { id: string; title: string; companyName: string; location: string }[];
 };
 
 type CandidateApplication = {
@@ -92,7 +96,7 @@ type CandidateApplication = {
 type SavedJob = { id: string; job: BasicJob };
 
 type RecommendedJob = {
-  id: number;
+  id: string;
   title: string;
   company: string;
   location: string;
@@ -107,7 +111,7 @@ type RecommendedJob = {
 };
 
 type EmployerJob = {
-  id: number;
+  id: string;
   title: string;
   company: string;
   location: string;
@@ -138,6 +142,7 @@ type EmployerJob = {
       id: string;
       name: string;
       email: string;
+      profilePictureUrl: string | null;
       location: string | null;
       headline: string | null;
       cvFileName: string | null;
@@ -422,7 +427,7 @@ function CandidateDashboard({
     }
   }
 
-  async function removeSavedJob(jobId: number) {
+  async function removeSavedJob(jobId: string) {
     try {
       const response = await fetch(`/api/jobs/${jobId}/save`, { method: "DELETE" });
       if (!response.ok) {
@@ -513,6 +518,7 @@ function CandidateDashboard({
           {section === "profile" &&
           <section className="dashboard-card" id="candidate-profile">
             <div className="dashboard-card-heading"><div><p className="section-kicker">YOUR STORY</p><h2>Candidate profile</h2></div><span className="profile-badge">{profile.email}</span></div>
+            <ProfilePictureEditor initialPictureUrl={profile.profilePictureUrl} name={name} />
             <form className="dashboard-form" onSubmit={saveProfile}>
               <label>Full name<input maxLength={80} minLength={2} onChange={(event) => setName(event.target.value)} required value={name} /></label>
               <label>Email address<input disabled value={profile.email} /></label>
@@ -521,7 +527,7 @@ function CandidateDashboard({
               <label className="full-width">Professional headline<input maxLength={140} onChange={(event) => setHeadline(event.target.value)} placeholder="e.g. Product designer making useful things" value={headline} /></label>
               <label className="full-width">About you<textarea maxLength={3000} onChange={(event) => setBio(event.target.value)} placeholder="Share a little about your experience and what you’re looking for." rows={4} value={bio} /></label>
               <label className="full-width">Skills <span className="label-hint">Separate skills with commas</span><input maxLength={1200} onChange={(event) => setSkills(event.target.value)} placeholder="Figma, user research, prototyping" value={skills} /></label>
-              <label className="full-width"><span>Employer search visibility</span><span className="visibility-option"><input checked={profileVisible} className="visibility-checkbox" onChange={(event) => setProfileVisible(event.target.checked)} type="checkbox" /><span>Allow employers to find my name, headline, location, bio, and skills. Contact details and CV stay private.</span></span></label>
+              <label className="full-width"><span>Employer search visibility</span><span className="visibility-option"><input checked={profileVisible} className="visibility-checkbox" onChange={(event) => setProfileVisible(event.target.checked)} type="checkbox" /><span>Allow employers to find my name, profile picture, headline, location, bio, and skills. Contact details and CV stay private. Employers you apply to can also see your profile picture.</span></span></label>
               <label className="full-width"><span>Email updates</span><span className="visibility-option"><input checked={emailNotifications} className="visibility-checkbox" onChange={(event) => setEmailNotifications(event.target.checked)} type="checkbox" /><span>Send me interview and application updates, plus matching job-alert emails.</span></span></label>
               <button className="button button-primary" disabled={busy} type="submit">{busy ? "Saving..." : "Save profile"}</button>
             </form>
@@ -652,6 +658,7 @@ function EmployerDashboard({
     id: string;
     name: string;
     headline: string | null;
+    profilePictureUrl: string | null;
     location: string | null;
     bio: string | null;
     skills: string[];
@@ -763,7 +770,7 @@ function EmployerDashboard({
     }
   }
 
-  async function updateJobStatus(jobId: number, status: "ACTIVE" | "CLOSED") {
+  async function updateJobStatus(jobId: string, status: "ACTIVE" | "CLOSED") {
     try {
       const response = await fetch(`/api/jobs/${jobId}`, {
         method: "PATCH",
@@ -1034,7 +1041,7 @@ function EmployerDashboard({
                 {section === "jobs" && <p className="applicant-filter-empty"><Link className="text-link" href="/dashboard/applicants">Review applicants →</Link></p>}
                 {section === "applicants" && (visibleApplications.length > 0 ? <div className="applicant-list">{visibleApplications.map((application) => (
                   <div className="applicant-row" key={application.id}>
-                    <div><strong>{application.applicant.name}</strong><p>{application.applicant.headline || application.applicant.location || application.applicant.email}</p>{application.applicant.skills.length > 0 && <small>{application.applicant.skills.join(" · ")}</small>}{application.coverLetter && <blockquote>{application.coverLetter}</blockquote>}{application.applicant.cvFileName && <a className="cv-download-link" href={`/api/applications/${application.id}/cv`}>Download CV · {application.applicant.cvFileName}</a>}
+                    <div className="applicant-profile"><ProfileAvatar className="applicant-profile-avatar" name={application.applicant.name} pictureUrl={application.applicant.profilePictureUrl} /><div><strong>{application.applicant.name}</strong><p>{application.applicant.headline || application.applicant.location || application.applicant.email}</p>{application.applicant.skills.length > 0 && <small>{application.applicant.skills.join(" · ")}</small>}{application.coverLetter && <blockquote>{application.coverLetter}</blockquote>}{application.applicant.cvFileName && <a className="cv-download-link" href={`/api/applications/${application.id}/cv`}>Download CV · {application.applicant.cvFileName}</a>}
                       {application.interviews.filter((interview) => interview.status === "SCHEDULED").map((interview) => <p key={interview.id}>Interview: {formatDateTime(interview.scheduledAt)}{interview.location ? ` · ${interview.location}` : ""}{interview.meetingUrl ? <> · <a className="text-link" href={interview.meetingUrl} rel="noreferrer" target="_blank">Meeting link</a></> : ""}</p>)}
                       <form className="stacked-form" onSubmit={(event) => scheduleInterview(event, application.id)}>
                         <label>Schedule an interview<input min={localDateTimeMinimum()} name="scheduledAt" required type="datetime-local" /></label>
@@ -1043,7 +1050,7 @@ function EmployerDashboard({
                         <label>Candidate note<textarea maxLength={2000} name="notes" rows={2} /></label>
                         <button className="button button-outline" type="submit">Schedule interview</button>
                       </form>
-                    </div>
+                    </div></div>
                     <label className="status-select-label">Application status<select aria-label={`Status for ${application.applicant.name}`} onChange={(event) => updateApplication(application.id, event.target.value)} value={application.status}>{["SUBMITTED", "REVIEWING", "SHORTLISTED", "REJECTED", "HIRED"].map((status) => <option key={status} value={status}>{statusLabel(status)}</option>)}</select></label>
                   </div>
                 ))}</div> : job.applications.length > 0
@@ -1072,6 +1079,7 @@ function EmployerDashboard({
             {candidateSearchError && <p className="form-error" role="alert">{candidateSearchError}</p>}
             {candidateResults.length > 0 && <div className="dashboard-list">{candidateResults.map((candidate) => (
               <article className="activity-row" key={candidate.id}>
+                <ProfileAvatar className="candidate-result-avatar" name={candidate.name} pictureUrl={candidate.profilePictureUrl} />
                 <div><strong>{candidate.name}</strong><p>{candidate.headline || candidate.location || "Candidate"}</p>{candidate.bio && <small>{candidate.bio}</small>}{candidate.skills.length > 0 && <p>{candidate.skills.join(" · ")}</p>}</div>
               </article>
             ))}</div>}
@@ -1094,6 +1102,7 @@ function EmployerDashboard({
           {section === "company" &&
           <section className="dashboard-card" id="employer-company">
             <p className="section-kicker">YOUR COMPANY</p><h2>Company profile</h2>
+            <ProfilePictureEditor initialPictureUrl={profile.profilePictureUrl} name={profile.name} />
             {verification?.status === "VERIFIED" && <p className="verification-state"><VerifiedBadge /> Your company registration has been reviewed.</p>}
             {profile.companyName && <p><Link className="text-link" href={`/companies/${profile.id}`}>View public profile →</Link></p>}
             <form className="stacked-form company-form" onSubmit={saveCompany}>

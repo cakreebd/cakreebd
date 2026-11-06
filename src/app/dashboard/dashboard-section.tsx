@@ -36,6 +36,7 @@ async function DashboardContent({ section }: { section: string }) {
         id: true,
         name: true,
         email: true,
+        profilePictureStorageKey: true,
         phone: true,
         location: true,
         headline: true,
@@ -105,11 +106,12 @@ async function DashboardContent({ section }: { section: string }) {
     } catch (error) {
       throw new Error("Could not load the saved profile skills.", { cause: error });
     }
+    const { profilePictureStorageKey, ...candidateProfile } = profile;
     const recommendedJobs = section === "overview"
       ? await prisma.job.findMany({
           where: { status: "ACTIVE", NOT: { employerId: user.id } },
           orderBy: [
-            { featuredUntil: { sort: "desc", nulls: "last" } },
+            { featuredUntil: "desc" },
             { createdAt: "desc" },
           ],
           take: 16,
@@ -122,20 +124,24 @@ async function DashboardContent({ section }: { section: string }) {
             },
           },
         })
-      : [];
+      : null;
     return (
       <>
         <SiteHeader user={user} />
         <DashboardClient
           mode="JOB_SEEKER"
           section={section}
-          profile={{ ...profile, skills }}
-          recommendedJobs={recommendedJobs.map((job) => ({
+          profile={{
+            ...candidateProfile,
+            profilePictureUrl: profilePictureStorageKey ? "/api/profile/picture" : null,
+            skills,
+          }}
+          recommendedJobs={recommendedJobs?.map((job) => ({
             ...toPublicJob(job),
             demo: isDemoCompany(job.companyName),
             companyVerified: job.companyName === job.employer.companyName &&
               job.employer.companyVerification?.status === "VERIFIED",
-          }))}
+          })) ?? []}
           applications={profile.applications.map((item) => ({
             id: item.id,
             status: item.status,
@@ -198,6 +204,7 @@ async function DashboardContent({ section }: { section: string }) {
       id: true,
       name: true,
       email: true,
+      profilePictureStorageKey: true,
       phone: true,
       companyName: true,
       companyBio: true,
@@ -239,6 +246,7 @@ async function DashboardContent({ section }: { section: string }) {
                 select: {
                   id: true,
                   name: true,
+                  profilePictureStorageKey: true,
                   email: true,
                   location: true,
                   headline: true,
@@ -254,20 +262,26 @@ async function DashboardContent({ section }: { section: string }) {
   });
   const jobs = profile.jobs.map((job) => ({
     ...toPublicJob(job),
-    applications: job.applications.map((application) => ({
-      id: application.id,
-      status: application.status,
-      createdAt: application.createdAt.toISOString(),
-      coverLetter: application.coverLetter,
-      interviews: application.interviews.map((interview) => ({
-        ...interview,
-        scheduledAt: interview.scheduledAt.toISOString(),
-      })),
-      applicant: {
-        ...application.applicant,
-        skills: parseSkills(application.applicant.skills),
-      },
-    })),
+    applications: job.applications.map((application) => {
+      const { profilePictureStorageKey, ...applicant } = application.applicant;
+      return {
+        id: application.id,
+        status: application.status,
+        createdAt: application.createdAt.toISOString(),
+        coverLetter: application.coverLetter,
+        interviews: application.interviews.map((interview) => ({
+          ...interview,
+          scheduledAt: interview.scheduledAt.toISOString(),
+        })),
+        applicant: {
+          ...applicant,
+          profilePictureUrl: profilePictureStorageKey
+            ? `/api/candidates/${application.applicant.id}/picture`
+            : null,
+          skills: parseSkills(application.applicant.skills),
+        },
+      };
+    }),
   }));
   let analytics: EmployerJobAnalytics[] | null = null;
   if (section === "analytics" && EMPLOYER_PLANS[effectiveEmployerPlan].analyticsDashboard) {
@@ -295,13 +309,17 @@ async function DashboardContent({ section }: { section: string }) {
     }));
   }
 
+  const { profilePictureStorageKey, ...employerProfile } = profile;
   return (
     <>
       <SiteHeader user={user} />
       <DashboardClient
         mode="EMPLOYER"
         section={section}
-        profile={profile}
+        profile={{
+          ...employerProfile,
+          profilePictureUrl: profilePictureStorageKey ? "/api/profile/picture" : null,
+        }}
         jobs={jobs}
         plan={effectiveEmployerPlan}
         analytics={analytics}

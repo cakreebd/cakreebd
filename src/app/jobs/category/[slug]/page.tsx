@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import type { Prisma } from "@prisma/client";
 import DemoBadge from "@/components/demo-badge";
 import FeaturedBadge from "@/components/featured-badge";
 import SiteHeader from "@/components/site-header";
@@ -52,7 +53,7 @@ async function CategoryContent({ params, searchParams }: PageProps) {
     : undefined;
   const postedAfter = postedWithin ? dateDaysAgo(postedWithin) : undefined;
   const salaryRangeInvalid = minSalary !== undefined && maxSalary !== undefined && minSalary > maxSalary;
-  const where = {
+  const where: Prisma.JobWhereInput = {
     category: category.name,
     status: "ACTIVE",
     ...(location === "Remote"
@@ -65,12 +66,13 @@ async function CategoryContent({ params, searchParams }: PageProps) {
     ...(minSalary ? { salaryMax: { gte: minSalary } } : {}),
     ...(maxSalary ? { salaryMin: { lte: maxSalary } } : {}),
     ...(postedAfter ? { createdAt: { gte: postedAfter } } : {}),
+    ...(salaryRangeInvalid ? { id: { in: [] } } : {}),
   };
   const [jobs, total] = await Promise.all([
-    salaryRangeInvalid ? Promise.resolve([]) : prisma.job.findMany({
+    prisma.job.findMany({
     where,
     orderBy: [
-      { featuredUntil: { sort: "desc", nulls: "last" } },
+      { featuredUntil: "desc" },
       { createdAt: "desc" },
     ],
     take: 100,
@@ -83,7 +85,7 @@ async function CategoryContent({ params, searchParams }: PageProps) {
       },
     },
     }),
-    salaryRangeInvalid ? Promise.resolve(0) : prisma.job.count({ where }),
+    prisma.job.count({ where }),
   ]);
   const hasFilters = Boolean(location || employmentType || workMode || minSalary || maxSalary || postedWithin);
 

@@ -7,7 +7,7 @@ export default function SaveJobButton({
   jobId,
   initiallySaved = false,
 }: {
-  jobId: number;
+  jobId: string;
   initiallySaved?: boolean;
 }) {
   const router = useRouter();

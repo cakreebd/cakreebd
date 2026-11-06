@@ -6,7 +6,7 @@ import DashboardSidebar from "@/components/dashboard-sidebar";
 
 type Overview = {
   users: { id: string; name: string; email: string; role: string; isActive: boolean; createdAt: string }[];
-  jobs: { id: number; title: string; companyName: string; status: string; createdAt: string; employer: { email: string } }[];
+  jobs: { id: string; title: string; companyName: string; status: string; createdAt: string; employer: { email: string } }[];
   pendingReviews: { id: string; rating: number; title: string; body: string; createdAt: string; author: { name: string; email: string }; company: { companyName: string | null; email: string } }[];
   pendingVerifications: {
     id: string;

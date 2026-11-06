@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { SessionUser } from "@/lib/auth";
 import LogoutButton from "@/components/logout-button";
+import ProfileAvatar from "@/components/profile-avatar";
 
 export default function SiteHeader({ user }: { user: SessionUser | null }) {
   return (
@@ -18,7 +19,10 @@ export default function SiteHeader({ user }: { user: SessionUser | null }) {
         <div className="header-actions">
           {user ? (
             <>
-              <Link className="login-link" href={user.role === "ADMIN" ? "/admin" : "/dashboard"}>{user.role === "ADMIN" ? "Admin dashboard" : "My dashboard"}</Link>
+              <Link className="login-link header-profile-link" href={user.role === "ADMIN" ? "/admin" : "/dashboard"}>
+                <ProfileAvatar className="header-profile-avatar" name={user.name} pictureUrl={user.profilePictureUrl} />
+                {user.role === "ADMIN" ? "Admin dashboard" : "My dashboard"}
+              </Link>
               <LogoutButton />
             </>
           ) : (

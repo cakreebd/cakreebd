@@ -9,7 +9,7 @@ import FeaturedBadge from "@/components/featured-badge";
 import DemoBadge from "@/components/demo-badge";
 import JobViewTracker from "@/components/job-analytics-tracker";
 import { getCurrentUser } from "@/lib/auth";
-import { formatSalary, parseTags, postedLabel } from "@/lib/jobs";
+import { formatSalary, isValidJobId, parseTags, postedLabel } from "@/lib/jobs";
 import { prisma } from "@/lib/prisma";
 import { isDemoCompany } from "@/lib/demo-content";
 
@@ -21,12 +21,11 @@ export default function JobDetailPage({ params }: PageProps) {
 
 async function JobDetailContent({ params }: PageProps) {
   const { id: rawId } = await params;
-  const id = Number(rawId);
-  if (!Number.isInteger(id) || id < 1) notFound();
+  if (!isValidJobId(rawId)) notFound();
 
   const user = await getCurrentUser();
   const job = await prisma.job.findFirst({
-    where: { id, status: "ACTIVE" },
+    where: { id: rawId, status: "ACTIVE" },
     include: {
       employer: {
         select: {
@@ -60,7 +59,7 @@ async function JobDetailContent({ params }: PageProps) {
   let relatedJobs = await prisma.job.findMany({
     where: relatedWhere,
     orderBy: [
-      { featuredUntil: { sort: "desc", nulls: "last" } },
+      { featuredUntil: "desc" },
       { createdAt: "desc" },
     ],
     take: 3,
